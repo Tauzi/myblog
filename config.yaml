@@ -56,7 +56,7 @@ params:
 
     sidebar:
         emoji: 🍥
-        subtitle: 加油努力.✍️
+        subtitle: 无限进步.✍️
         avatar:
             enabled: true
             local: true
@@ -180,7 +180,7 @@ params:
         toggle: true
 
         # Available values: auto, light, dark
-        default: auto
+        default: light
 
     imageProcessing:
         cover:
@@ -201,8 +201,8 @@ menu:
           params:
               icon: brand-github
         - identifier: weixin
-          name: Dreamq0p
-          url: 
+          name: weixin
+          url: https://github.com/Tauzi
           params:
               icon: wx
     
