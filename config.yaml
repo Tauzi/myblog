@@ -1,4 +1,4 @@
-baseurl: /
+baseurl: /myblog/
 languageCode: zh-cn
 theme: hugo-theme-stack
 paginate: 5
