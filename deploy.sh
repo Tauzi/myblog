@@ -1,4 +1,4 @@
-hugo #构造你的blog
+hugo --theme=hugo-theme-stack --baseUrl=https://tauzi.github.io/myblog/ --buildDrafts
 
 cd public
 

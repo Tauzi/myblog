@@ -1,8 +1,6 @@
 ---
 title: JavaWeb网络编程
-description: 
-date: 2023-05-05
-slug: test-chinese
+date: 2023-05-03
 categories:
     - Java
     - Web

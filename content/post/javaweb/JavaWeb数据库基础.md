@@ -1,10 +1,9 @@
 ---
-title: 数据库基础
+title: JavaWeb数据库基础
 date: 2023-05-03
-tags:
- - Java
 categories:
- - 笔记
+    - Java
+    - Web
 ---
 
 
