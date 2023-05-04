@@ -12,7 +12,7 @@ languages:
     zh-cn:
         languageName: 中文
         title: TauZZ's Blog
-        description: 
+        description: 👋Welcome To TauZZ's Blog
         weight: 1
     # ar:
     #     languageName: عربي
@@ -56,7 +56,7 @@ params:
 
     sidebar:
         emoji: 🍥
-        subtitle: 无限进步.✍️
+        subtitle: 加油努力.✍️
         avatar:
             enabled: true
             local: true

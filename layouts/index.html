@@ -1,0 +1,31 @@
+{{ define "main" }}
+    {{ $pages := where .Site.RegularPages "Type" "in" .Site.Params.mainSections }}
+    {{ $notHidden := where .Site.RegularPages "Params.hidden" "!=" true }}
+    {{ $filtered := ($pages | intersect $notHidden) }}
+    {{ $pag := .Paginate ($filtered) }}
+
+    <div class="welcome">
+        <p style="font-size: 2rem;text-align: center;font-weight: bolder;">👋Welcome To <span style="color:#e99312">TauZZ's Blog</span></p>
+    </div>
+    
+    <style>
+        .welcome {
+        color: var(--card-text-color-main);
+        background: var(--card-background);
+        box-shadow: var(--shadow-l2);
+        border-radius: var(--card-border-radius);
+    }
+    </style>
+    <section class="article-list">
+        {{ range $index, $element := $pag.Pages }}
+            {{ partial "article-list/default" . }}
+        {{ end }}
+    </section>
+
+    {{- partial "pagination.html" . -}}
+    {{- partial "footer/footer" . -}}
+{{ end }}
+
+{{ define "right-sidebar" }}
+    {{ partial "sidebar/right.html" (dict "Context" . "Scope" "homepage") }}
+{{ end }}

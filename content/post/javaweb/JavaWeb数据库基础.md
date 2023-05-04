@@ -2,8 +2,7 @@
 title: JavaWeb数据库基础
 date: 2023-05-03
 categories:
-    - Java
-    - Web
+    - JavaWeb
 ---
 
 
