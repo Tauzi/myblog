@@ -1,1 +1,1 @@
-Example site modified from https://github.com/gohugoio/hugoBasicExample
+我的博客 基于hugo
