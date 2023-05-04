@@ -4,6 +4,6 @@ git init #初始化git
 
 git add -A
 
-git commit -m 'deploy2'
+git commit -m 'deploy'
 
 git push -f git@github.com:Tauzi/myblog.git main#向存储库推送
