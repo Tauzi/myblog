@@ -44,7 +44,7 @@ params:
         - post
     featuredImageField: image
     rssFullContent: true
-    favicon: /img/favicon.ico # e.g.: favicon placed in `static/favicon.ico` of your site folder, then set this field to `/favicon.ico` (`/` is necessary)
+    favicon: img/favicon.ico # e.g.: favicon placed in `static/favicon.ico` of your site folder, then set this field to `/favicon.ico` (`/` is necessary)
 
     footer:
         since: 2020
@@ -201,8 +201,8 @@ menu:
           params:
               icon: brand-github
         - identifier: weixin
-          name: weixin
-          url: https://github.com/Tauzi
+          name: Dreamq0p
+          url: https://img.picgo.net/2023/05/09/3b2ebde1c8640d69530516428a740b82ea5623263a52eda.jpeg
           params:
               icon: wx
     
