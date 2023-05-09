@@ -12,7 +12,30 @@
         <pubDate>Tue, 09 May 2023 00:00:00 +0000</pubDate>
         
         <guid>https://tauzi.github.io/myblog/p/suibi/</guid>
-        <description>&lt;img src="https://tauzi.github.io/myblog/p/suibi/1.jpg" alt="Featured image of post hugo搭建" /&gt;&lt;h2 id=&#34;初始化博客&#34;&gt;初始化博客&lt;/h2&gt;
+        <description>&lt;img src="https://tauzi.github.io/myblog/p/suibi/1.jpg" alt="Featured image of post hugo搭建" /&gt;&lt;h2 id=&#34;安装hugo&#34;&gt;安装hugo&lt;/h2&gt;
+&lt;p&gt;1.从hugo官方github仓库下载hugo,记得必须使用带有&lt;code&gt;extended&lt;/code&gt;的版本&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;hugo官方下载地址: &lt;a class=&#34;link&#34; href=&#34;https://github.com/gohugoio/hugo/releases&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://github.com/gohugoio/hugo/releases&lt;/a&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;2.在任意盘下创建文件夹名为&lt;code&gt;hugo&lt;/code&gt;,进入&lt;code&gt;hugo&lt;/code&gt;文件夹下并创建名为&lt;code&gt;bin&lt;/code&gt;的文件夹,将下载下来的zip文件解压到&lt;code&gt;bin&lt;/code&gt;里面&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;完整的路径即为: e:\hugo\bin&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;3.接下来设置hugo环境变量,依次打开设置,然后选择系统,滑到下面选择系统信息,打开高级系统设置,打开环境变量
+如图
+&lt;img src=&#34;https://img.picgo.net/2023/05/09/image8d71a668919b47d3.png&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;image8d71a668919b47d3.png&#34;
+	
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;4.检查一下hugo是否安装成功,打开cmd或终端输入hugo version,如果输出一下内容则证明配置成功&lt;/p&gt;
+&lt;h2 id=&#34;初始化博客&#34;&gt;初始化博客&lt;/h2&gt;
 &lt;p&gt;在桌面右键,选择在终端打开,然后输入以下命令&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
