@@ -747,6 +747,12 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;等待完成构建后就可以访问了!&lt;/p&gt;
+&lt;h2 id=&#34;省流版&#34;&gt;省流版&lt;/h2&gt;
+&lt;p&gt;1.&lt;code&gt;git clone https://github.com/Tauzi/myblog.git&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;2.修改config名称配置&lt;/p&gt;
+&lt;p&gt;3.删除post里我的笔记添加你自己的笔记&lt;/p&gt;
+&lt;p&gt;4.开启page&lt;/p&gt;
+&lt;p&gt;5.每次写完blog 使用git bash deploy.sh推送&lt;/p&gt;
 </description>
         </item>
         <item>
