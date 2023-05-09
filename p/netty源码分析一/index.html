@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='精尽 Netty 源码分析 —— NIO 基础（一）之简介 1. 概述 Java NIO( New IO 或者 Non Blocking IO ) ，从 Java 1.4 版本开始引入的非阻塞 IO ，用于替换标准( 有些文章也称为传统，或者 Blocking IO 。下文统称为 BIO ) Java IO API 的 IO API 。
+老艿艿：在一些文章中，会将 Java NIO 描述成异步 IO ，实际是不太正确的： Java NIO 是同步 IO ，Java AIO ( 也称为 NIO 2 )是异步 IO。具体原因，推荐阅读文章：
+《异步和非阻塞一样吗? (内容涉及 BIO, NIO, AIO, Netty)》 。
+《BIO与NIO、AIO的区别(这个容易理解)》
+总结来说，在 Unix IO 模型的语境下：
+同步和异步的区别：数据拷贝阶段是否需要完全由操作系统处理。
+阻塞和非阻塞操作：是针对发起 IO 请求操作后，是否有立刻返回一个标志信息而不让请求线程等待。'>
+<title>netty源码分析一</title>
+
+<link rel='canonical' href='https://tauzi.github.io/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80/'>
+
+<link rel="stylesheet" href="/myblog/scss/style.min.50c1fc6533b62d77f594233c8f3413de02946f2ffe11e85728071f2bc3aae8e2.css"><meta property='og:title' content='netty源码分析一'>
+<meta property='og:description' content='精尽 Netty 源码分析 —— NIO 基础（一）之简介 1. 概述 Java NIO( New IO 或者 Non Blocking IO ) ，从 Java 1.4 版本开始引入的非阻塞 IO ，用于替换标准( 有些文章也称为传统，或者 Blocking IO 。下文统称为 BIO ) Java IO API 的 IO API 。
+老艿艿：在一些文章中，会将 Java NIO 描述成异步 IO ，实际是不太正确的： Java NIO 是同步 IO ，Java AIO ( 也称为 NIO 2 )是异步 IO。具体原因，推荐阅读文章：
+《异步和非阻塞一样吗? (内容涉及 BIO, NIO, AIO, Netty)》 。
+《BIO与NIO、AIO的区别(这个容易理解)》
+总结来说，在 Unix IO 模型的语境下：
+同步和异步的区别：数据拷贝阶段是否需要完全由操作系统处理。
+阻塞和非阻塞操作：是针对发起 IO 请求操作后，是否有立刻返回一个标志信息而不让请求线程等待。'>
+<meta property='og:url' content='https://tauzi.github.io/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80/'>
+<meta property='og:site_name' content='TauZZ&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2023-05-04T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2023-05-04T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="netty源码分析一">
+<meta name="twitter:description" content="精尽 Netty 源码分析 —— NIO 基础（一）之简介 1. 概述 Java NIO( New IO 或者 Non Blocking IO ) ，从 Java 1.4 版本开始引入的非阻塞 IO ，用于替换标准( 有些文章也称为传统，或者 Blocking IO 。下文统称为 BIO ) Java IO API 的 IO API 。
+老艿艿：在一些文章中，会将 Java NIO 描述成异步 IO ，实际是不太正确的： Java NIO 是同步 IO ，Java AIO ( 也称为 NIO 2 )是异步 IO。具体原因，推荐阅读文章：
+《异步和非阻塞一样吗? (内容涉及 BIO, NIO, AIO, Netty)》 。
+《BIO与NIO、AIO的区别(这个容易理解)》
+总结来说，在 Unix IO 模型的语境下：
+同步和异步的区别：数据拷贝阶段是否需要完全由操作系统处理。
+阻塞和非阻塞操作：是针对发起 IO 请求操作后，是否有立刻返回一个标志信息而不让请求线程等待。">
+    <link rel="shortcut icon" href="img/favicon.ico" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "light");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/myblog/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/myblog/img/avatar_hu41e9bf84b16d248cd89556079ae4f725_243458_300x0_resize_box_3.png" width="300"
+                            height="442" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/myblog">TauZZ&#39;s Blog</a></h1>
+            <h2 class="site-description">加油努力.✍️</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://img.picgo.net/2023/05/09/3b2ebde1c8640d69530516428a740b82ea5623263a52eda.jpeg'
+                        target="_blank"
+                        title="Dreamq0p"
+                        rel="me"
+                    >
+                        
+                        
+                            <?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1683196971239" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2753" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1024 624.6c0-149.9-142.3-271.8-317.2-271.8s-317.2 122-317.2 271.8c0 149.9 142.3 271.8 317.2 271.8 30.4 0 60.5-3.7 89.4-10.9 7.9 1.1 30.2 13 43.7 20.2 29.4 15.6 49.6 25.8 65.9 25.8 5.2 0 9.9-1 14.4-3.2 24.9-12.1 15-43.1 5.5-73.1-2.5-8-6.5-20.4-7.8-27.7C985.5 776 1024 702.4 1024 624.6z m-137.5 173c-19.4 14.1-11.1 40.2-1.5 70.5 1.3 4.2 3 9.5 4.5 14.7-9.7-4.4-21.1-10.5-29.4-14.9-29.3-15.6-48.5-25.3-64.3-25.3-3 0-5.8 0.3-8.6 1.1-25.9 6.6-52.9 10-80.3 10-151.3 0-274.3-102.7-274.3-229s123.1-229 274.3-229 274.3 102.7 274.3 229c-0.1 66.3-34.6 129.3-94.7 172.9z" p-id="2754" fill="#bfbfbf"></path><path d="M379.1 621.5c0-150.7 146.6-273.7 326.7-274.1 6.9 0 13.4-3.4 17.4-9 4-5.7 5-12.9 2.8-19.4-22.4-64.5-69.6-122.4-132.7-163-64.6-41.5-141.5-63.5-222.6-63.5C166.3 92.5 0 234.8 0 409.7c0 91.4 45.7 177.7 125.5 238-1.2 8.5-6.4 25-9.7 35.5-11.2 35.4-21.8 68.9 4.5 81.7 4.8 2.3 9.8 3.4 15.4 3.4 18.3 0 41.7-11.8 76-30 16.8-8.9 44.7-23.7 53.7-24.3 34.1 8.6 69.5 13 105.4 13h1.3c6.9 0 13.5-3.4 17.5-9 4-5.7 5-12.9 2.8-19.5-8.8-25.2-13.3-51-13.3-77z m-42.8 0c0 20.7 2.4 41.3 7 61.5-23.2-1.6-46.1-5.3-68.3-11-19.4-5-44.3 7.5-83.4 28.3-12.1 6.4-29.7 15.8-42.5 21 2.1-8.3 5.3-18.2 7.5-25.3 10.9-34.4 20.3-64-0.4-79-72-52.2-113.3-127.8-113.3-207.3 0-151.3 147.1-274.3 327.9-274.3 133.2 0 253.5 68.8 303.4 170.4-189 14.1-337.9 150.5-337.9 315.7z" p-id="2755" fill="#bfbfbf"></path><path d="M249.9 305.3m-42.9 0a42.9 42.9 0 1 0 85.8 0 42.9 42.9 0 1 0-85.8 0Z" p-id="2756" fill="#bfbfbf"></path><path d="M493.9 305.3m-42.9 0a42.9 42.9 0 1 0 85.8 0 42.9 42.9 0 1 0-85.8 0Z" p-id="2757" fill="#bfbfbf"></path><path d="M614.9 548.2m-34.3 0a34.3 34.3 0 1 0 68.6 0 34.3 34.3 0 1 0-68.6 0Z" p-id="2758" fill="#bfbfbf"></path><path d="M806.7 548.2m-34.3 0a34.3 34.3 0 1 0 68.6 0 34.3 34.3 0 1 0-68.6 0Z" p-id="2759" fill="#bfbfbf"></path></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/Tauzi'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/myblog/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/myblog/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/myblog/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/myblog/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/myblog/%E5%8F%8B%E9%93%BE/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>友链</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#httpsvipiocodercnnettynio-1-intro3-1-e59fbae4ba8e-buffer-e4b88ee59fbae4ba8e-stream-31-基于-buffer-与基于-stream31-基于-buffer-与基于-stream"><a href="http://svip.iocoder.cn/Netty/nio-1-intro/#3-1-%E5%9F%BA%E4%BA%8E-Buffer-%E4%B8%8E%E5%9F%BA%E4%BA%8E-Stream" title="3.1 基于 Buffer 与基于 Stream"></a>3.1 基于 Buffer 与基于 Stream</a></li>
+    <li><a href="#httpsvipiocodercnnettynio-1-intro3-2-e998bbe5a19ee4b88ee99d9ee998bbe5a19e-io-32-阻塞与非阻塞-io32-阻塞与非阻塞-io"><a href="http://svip.iocoder.cn/Netty/nio-1-intro/#3-2-%E9%98%BB%E5%A1%9E%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E-IO" title="3.2 阻塞与非阻塞 IO"></a>3.2 阻塞与非阻塞 IO</a></li>
+    <li><a href="#httpsvipiocodercnnettynio-1-intro3-3-selector-33-selector33-selector"><a href="http://svip.iocoder.cn/Netty/nio-1-intro/#3-3-Selector" title="3.3 Selector"></a>3.3 Selector</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/myblog/categories/netty/" >
+                Netty
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80/">netty源码分析一</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">May 04, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 2 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="精尽-netty-源码分析--nio-基础一之简介">精尽 Netty 源码分析 —— NIO 基础（一）之简介</h1>
+<h1 id="httpsvipiocodercnnettynio-1-intro1-e6a682e8bfb0-1-概述1-概述"><a class="link" href="http://svip.iocoder.cn/Netty/nio-1-intro/#1-%E6%A6%82%E8%BF%B0"  title="1. 概述"
+     target="_blank" rel="noopener"
+    ></a>1. 概述</h1>
+<p>Java NIO( New IO 或者 Non Blocking IO ) ，从 Java 1.4 版本开始引入的<strong>非阻塞</strong> IO ，用于替换<strong>标准</strong>( 有些文章也称为<strong>传统</strong>，或者 Blocking IO 。下文统称为 BIO ) Java IO API 的 IO API 。</p>
+<blockquote>
+<p>老艿艿：在一些文章中，会将 Java NIO 描述成<strong>异步</strong> IO ，实际是不太正确的： Java NIO 是<strong>同步</strong> IO ，Java AIO ( 也称为 NIO 2 )是<strong>异步</strong> IO。具体原因，推荐阅读文章：</p>
+<ul>
+<li>
+<p><a class="link" href="https://blog.csdn.net/matthew_zhang/article/details/71328697"  target="_blank" rel="noopener"
+    >《异步和非阻塞一样吗? (内容涉及 BIO, NIO, AIO, Netty)》</a> 。</p>
+</li>
+<li>
+<p><a class="link" href="https://blog.csdn.net/skiof007/article/details/52873421"  target="_blank" rel="noopener"
+    >《BIO与NIO、AIO的区别(这个容易理解)》</a></p>
+</li>
+</ul>
+<p>总结来说，在 <strong>Unix IO 模型</strong>的语境下：</p>
+<ul>
+<li>
+<p>同步和异步的区别：数据拷贝阶段是否需要完全由操作系统处理。</p>
+</li>
+<li>
+<p>阻塞和非阻塞操作：是针对发起 IO 请求操作后，是否有立刻返回一个标志信息而不让请求线程等待。</p>
+</li>
+</ul>
+<p>因此，Java NIO 是<strong>同步</strong>且非阻塞的 IO 。</p>
+</blockquote>
+<h1 id="httpsvipiocodercnnettynio-1-intro2-e6a0b8e5bf83e7bb84e4bbb6-2-核心组件2-核心组件"><a class="link" href="http://svip.iocoder.cn/Netty/nio-1-intro/#2-%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"  title="2. 核心组件"
+     target="_blank" rel="noopener"
+    ></a>2. 核心组件</h1>
+<p>Java NIO 由如下<strong>三个</strong>核心组件组成：</p>
+<ul>
+<li>
+<p>Channel</p>
+</li>
+<li>
+<p>Buffer</p>
+</li>
+<li>
+<p>Selector</p>
+</li>
+</ul>
+<p>后续的每篇文章，我们会分享对应的一个组件。</p>
+<h1 id="httpsvipiocodercnnettynio-1-intro3-nio-e5928c-bio-e79a84e5afb9e6af94-3-nio-和-bio-的对比3-nio-和-bio-的对比"><a class="link" href="http://svip.iocoder.cn/Netty/nio-1-intro/#3-NIO-%E5%92%8C-BIO-%E7%9A%84%E5%AF%B9%E6%AF%94"  title="3. NIO 和 BIO 的对比"
+     target="_blank" rel="noopener"
+    ></a>3. NIO 和 BIO 的对比</h1>
+<p>NIO 和 BIO 的区别主要体现在三个方面：</p>
+<p>NIO</p>
+<p>BIO</p>
+<p>基于缓冲区( Buffer )</p>
+<p>基于流( Stream )</p>
+<p><strong>非</strong>阻塞 IO</p>
+<p>阻塞 IO</p>
+<p>选择器( Selector )</p>
+<p>无</p>
+<ul>
+<li>其中，选择器( Selector )是 NIO 能实现<strong>非</strong>阻塞的基础。</li>
+</ul>
+<h2 id="httpsvipiocodercnnettynio-1-intro3-1-e59fbae4ba8e-buffer-e4b88ee59fbae4ba8e-stream-31-基于-buffer-与基于-stream31-基于-buffer-与基于-stream"><a class="link" href="http://svip.iocoder.cn/Netty/nio-1-intro/#3-1-%E5%9F%BA%E4%BA%8E-Buffer-%E4%B8%8E%E5%9F%BA%E4%BA%8E-Stream"  title="3.1 基于 Buffer 与基于 Stream"
+     target="_blank" rel="noopener"
+    ></a>3.1 基于 Buffer 与基于 Stream</h2>
+<p>BIO 是面向字节流或者字符流的，而在 NIO 中，它摒弃了传统的 IO 流，而是引入 Channel 和 Buffer 的概念：从 Channel 中读取数据到 Buffer 中，或者将数据从 Buffer 中写到 Channel 中。</p>
+<p>① 那么什么是<strong>基于 Stream</strong>呢？</p>
+<p>在一般的 Java IO 操作中，我们以<strong>流式</strong>的方式，<strong>顺序</strong>的从一个 Stream 中读取一个或者多个字节，直至读取所有字节。因为它没有缓存区，所以我们就不能随意改变读取指针的位置。</p>
+<p>② 那么什么是<strong>基于 Buffer</strong> 呢？</p>
+<p>基于 Buffer 就显得有点不同了。我们在从 Channel 中读取数据到 Buffer 中，这样 Buffer 中就有了数据后，我们就可以对这些数据进行操作了。并且不同于一般的 Java IO 操作那样是<strong>顺序</strong>操作，NIO 中我们可以随意的读取任意位置的数据，这样大大增加了处理过程中的灵活性。</p>
+<blockquote>
+<p>老艿艿：<strong>写入</strong>操作，也符合上述<strong>读取</strong>操作的情况。</p>
+</blockquote>
+<h2 id="httpsvipiocodercnnettynio-1-intro3-2-e998bbe5a19ee4b88ee99d9ee998bbe5a19e-io-32-阻塞与非阻塞-io32-阻塞与非阻塞-io"><a class="link" href="http://svip.iocoder.cn/Netty/nio-1-intro/#3-2-%E9%98%BB%E5%A1%9E%E4%B8%8E%E9%9D%9E%E9%98%BB%E5%A1%9E-IO"  title="3.2 阻塞与非阻塞 IO"
+     target="_blank" rel="noopener"
+    ></a>3.2 阻塞与非阻塞 IO</h2>
+<p>Java IO 的各种流是<strong>阻塞</strong>的 IO 操作。这就意味着，当一个线程执行读或写 IO 操作时，该线程会被<strong>阻塞</strong>，直到有一些数据被读取，或者数据完全写入。</p>
+<hr>
+<p>Java NIO 可以让我们<strong>非阻塞</strong>的使用 IO 操作。例如：</p>
+<ul>
+<li>
+<p>当一个线程执行从 Channel 执行读取 IO 操作时，当此时有数据，则读取数据并返回；当此时无数据，则直接返回<strong>而不会阻塞当前线程</strong>。</p>
+</li>
+<li>
+<p>当一个线程执行向 Channel 执行写入 IO 操作时，<strong>不需要阻塞等待它完全写入</strong>，这个线程同时可以做别的事情。</p>
+</li>
+</ul>
+<p>也就是说，线程可以将非阻塞 IO 的空闲时间用于在其他 Channel 上执行 IO 操作。所以，一个单独的线程，可以管理多个 Channel 的读取和写入 IO 操作。</p>
+<h2 id="httpsvipiocodercnnettynio-1-intro3-3-selector-33-selector33-selector"><a class="link" href="http://svip.iocoder.cn/Netty/nio-1-intro/#3-3-Selector"  title="3.3 Selector"
+     target="_blank" rel="noopener"
+    ></a>3.3 Selector</h2>
+<p>Java NIO 引入 Selector ( 选择器 )的概念，它是 Java NIO 得以实现非阻塞 IO 操作的<strong>最最最关键</strong>。</p>
+<p>我们可以注册<strong>多个</strong> Channel 到<strong>一个</strong> Selector 中。而 Selector 内部的机制，就可以自动的为我们不断的执行查询( select )操作，判断这些注册的 Channel 是否有<strong>已就绪的 IO 事件( 例如可读，可写，网络连接已完成 )</strong>。<br>
+通过这样的机制，<strong>一个</strong>线程通过使用<strong>一个</strong> Selector ，就可以非常简单且高效的来管理<strong>多个</strong> Channel 了。</p>
+<h1 id="httpsvipiocodercnnettynio-1-intro4-nio-e5928c-aio-e79a84e5afb9e6af94-4-nio-和-aio-的对比4-nio-和-aio-的对比"><a class="link" href="http://svip.iocoder.cn/Netty/nio-1-intro/#4-NIO-%E5%92%8C-AIO-%E7%9A%84%E5%AF%B9%E6%AF%94"  title="4. NIO 和 AIO 的对比"
+     target="_blank" rel="noopener"
+    ></a>4. NIO 和 AIO 的对比</h1>
+<p>考虑到 Netty 4.1.X 版本实际并未基于 Java AIO 实现，所以我们就省略掉这块内容。那么，感兴趣的同学，可以自己 Google 下 Java NIO 和 Java AIO 的对比。</p>
+<p>具体为什么 Netty 4.1.X 版本不支持 Java AIO 的原因，可参见 <a class="link" href="https://juejin.im/entry/5a8ed33b6fb9a0634c26801c"  target="_blank" rel="noopener"
+    >《Netty（二）：Netty 为啥去掉支持 AIO ?》</a> 文章。</p>
+<p>也因此，Netty 4.1.X 一般情况下，使用的是<strong>同步非阻塞的 NIO 模型</strong>。当然，如果真的有必要，也可以使用<strong>同步阻塞的 BIO 模型</strong>。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%89/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析三</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%BA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析二</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%BA%94/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析五</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%9B%9B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析四</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E9%9D%A2%E8%AF%95%E9%A2%98/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty面试题</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src='//unpkg.com/@waline/client@v2/dist/waline.js'></script>
+<link href='//unpkg.com/@waline/client@v2/dist/waline.css' rel='stylesheet'/>
+<div id="waline" class="waline-container"></div>
+<style>
+    .waline-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+        --waline-font-size: var(--article-font-size);
+    }
+    .waline-container .wl-count {
+        color: var(--card-text-color-main);
+    }
+</style><script>
+    
+    Waline.init({"dark":"html[data-scheme=\"dark\"]","el":"#waline","emoji":["https://cdn.jsdelivr.net/npm/sticker-heo@2022.7.5/Sticker-100/"],"locale":{"admin":"👻屑博主","placeholder":"🎉留下你的脚印."},"requiredMeta":["name","email"]});
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2023 TauZZ&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/myblog/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>

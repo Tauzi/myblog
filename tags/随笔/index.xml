@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>随笔 on TauZZ&#39;s Blog</title>
+        <link>myblog/tags/%E9%9A%8F%E7%AC%94/</link>
+        <description>Recent content in 随笔 on TauZZ&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <lastBuildDate>Tue, 09 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="myblog/tags/%E9%9A%8F%E7%AC%94/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>hugo搭建</title>
+        <link>myblog/p/suibi/</link>
+        <pubDate>Tue, 09 May 2023 00:00:00 +0000</pubDate>
+        
+        <guid>myblog/p/suibi/</guid>
+        <description>&lt;img src="/myblog/p/suibi/1.jpg" alt="Featured image of post hugo搭建" /&gt;&lt;p&gt;&lt;img src=&#34;myblog/myblog/p/suibi/1.jpg&#34;
+	width=&#34;1200&#34;
+	height=&#34;679&#34;
+	srcset=&#34;myblog/myblog/p/suibi/1_huc6c8a4f3d1059672265c0e5adae6d2de_603933_480x0_resize_q75_box.jpg 480w, myblog/myblog/p/suibi/1_huc6c8a4f3d1059672265c0e5adae6d2de_603933_1024x0_resize_q75_box.jpg 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;e&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;176&#34;
+		data-flex-basis=&#34;424px&#34;
+	
+&gt;
+&lt;img src=&#34;myblog/myblog/2.jpg&#34;
+	
+	
+	
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;e23&#34;
+	
+	
+&gt;&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

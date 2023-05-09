@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Categories on TauZZ&#39;s Blog</title>
+        <link>https://tauzi.github.io/myblog/categories/</link>
+        <description>Recent content in Categories on TauZZ&#39;s Blog</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <lastBuildDate>Tue, 09 May 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://tauzi.github.io/myblog/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>随笔</title>
+        <link>https://tauzi.github.io/myblog/categories/%E9%9A%8F%E7%AC%94/</link>
+        <pubDate>Tue, 09 May 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://tauzi.github.io/myblog/categories/%E9%9A%8F%E7%AC%94/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Netty</title>
+        <link>https://tauzi.github.io/myblog/categories/netty/</link>
+        <pubDate>Thu, 04 May 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://tauzi.github.io/myblog/categories/netty/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>JavaWeb</title>
+        <link>https://tauzi.github.io/myblog/categories/javaweb/</link>
+        <pubDate>Wed, 03 May 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://tauzi.github.io/myblog/categories/javaweb/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Test</title>
+        <link>https://tauzi.github.io/myblog/categories/test/</link>
+        <pubDate>Wed, 09 Sep 2020 00:00:00 +0000</pubDate>
+        
+        <guid>https://tauzi.github.io/myblog/categories/test/</guid>
+        <description>&lt;img src="https://tauzi.github.io/myblog/categories/test/hutomo-abrianto-l2jk-uxb1BY-unsplash.jpg" alt="Featured image of post Test" /&gt;</description>
+        </item>
+        <item>
+        <title>测试</title>
+        <link>https://tauzi.github.io/myblog/categories/%E6%B5%8B%E8%AF%95/</link>
+        <pubDate>Wed, 09 Sep 2020 00:00:00 +0000</pubDate>
+        
+        <guid>https://tauzi.github.io/myblog/categories/%E6%B5%8B%E8%AF%95/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>

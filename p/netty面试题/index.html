@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='精尽 Netty 面试题 以下面试题，转载芋道源码
+BIO 是什么？ 🦅 概念
+BIO ，全称 Block-IO ，是一种阻塞 &#43; 同步的通信模式。
+是一个比较传统的通信方式，模式简单，使用方便。但并发处理能力低，通信耗时，依赖网速。
+🦅 原理
+服务器通过一个 Acceptor 线程，负责监听客户端请求和为每个客户端创建一个新的线程进行链路处理。典型的一请求一应答模式。
+若客户端数量增多，频繁地创建和销毁线程会给服务器打开很大的压力。后改良为用线程池的方式代替新增线程，被称为伪异步 IO 。
+🦅 示例
+代码参见 bio 。 🦅 小结
+BIO 模型中，通过 Socket 和 ServerSocket 实现套接字通道的通信。阻塞，同步，建立连接耗时。
+NIO 是什么？ 🦅 概念
+NIO ，全称 New IO ，也叫 Non-Block IO ，是一种非阻塞 &#43; 同步的通信模式。
+《精尽 Netty 源码分析 —— NIO 基础（一）之简介》
+🦅 原理
+NIO 相对于 BIO 来说一大进步。客户端和服务器之间通过 Channel 通信。NIO 可以在 Channel 进行读写操作。这些 Channel 都会被注册在 Selector 多路复用器上。Selector 通过一个线程不停的轮询这些 Channel 。找出已经准备就绪的 Channel 执行 IO 操作。'>
+<title>netty面试题</title>
+
+<link rel='canonical' href='https://tauzi.github.io/myblog/p/netty%E9%9D%A2%E8%AF%95%E9%A2%98/'>
+
+<link rel="stylesheet" href="/myblog/scss/style.min.50c1fc6533b62d77f594233c8f3413de02946f2ffe11e85728071f2bc3aae8e2.css"><meta property='og:title' content='netty面试题'>
+<meta property='og:description' content='精尽 Netty 面试题 以下面试题，转载芋道源码
+BIO 是什么？ 🦅 概念
+BIO ，全称 Block-IO ，是一种阻塞 &#43; 同步的通信模式。
+是一个比较传统的通信方式，模式简单，使用方便。但并发处理能力低，通信耗时，依赖网速。
+🦅 原理
+服务器通过一个 Acceptor 线程，负责监听客户端请求和为每个客户端创建一个新的线程进行链路处理。典型的一请求一应答模式。
+若客户端数量增多，频繁地创建和销毁线程会给服务器打开很大的压力。后改良为用线程池的方式代替新增线程，被称为伪异步 IO 。
+🦅 示例
+代码参见 bio 。 🦅 小结
+BIO 模型中，通过 Socket 和 ServerSocket 实现套接字通道的通信。阻塞，同步，建立连接耗时。
+NIO 是什么？ 🦅 概念
+NIO ，全称 New IO ，也叫 Non-Block IO ，是一种非阻塞 &#43; 同步的通信模式。
+《精尽 Netty 源码分析 —— NIO 基础（一）之简介》
+🦅 原理
+NIO 相对于 BIO 来说一大进步。客户端和服务器之间通过 Channel 通信。NIO 可以在 Channel 进行读写操作。这些 Channel 都会被注册在 Selector 多路复用器上。Selector 通过一个线程不停的轮询这些 Channel 。找出已经准备就绪的 Channel 执行 IO 操作。'>
+<meta property='og:url' content='https://tauzi.github.io/myblog/p/netty%E9%9D%A2%E8%AF%95%E9%A2%98/'>
+<meta property='og:site_name' content='TauZZ&#39;s Blog'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2023-05-04T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2023-05-04T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="netty面试题">
+<meta name="twitter:description" content="精尽 Netty 面试题 以下面试题，转载芋道源码
+BIO 是什么？ 🦅 概念
+BIO ，全称 Block-IO ，是一种阻塞 &#43; 同步的通信模式。
+是一个比较传统的通信方式，模式简单，使用方便。但并发处理能力低，通信耗时，依赖网速。
+🦅 原理
+服务器通过一个 Acceptor 线程，负责监听客户端请求和为每个客户端创建一个新的线程进行链路处理。典型的一请求一应答模式。
+若客户端数量增多，频繁地创建和销毁线程会给服务器打开很大的压力。后改良为用线程池的方式代替新增线程，被称为伪异步 IO 。
+🦅 示例
+代码参见 bio 。 🦅 小结
+BIO 模型中，通过 Socket 和 ServerSocket 实现套接字通道的通信。阻塞，同步，建立连接耗时。
+NIO 是什么？ 🦅 概念
+NIO ，全称 New IO ，也叫 Non-Block IO ，是一种非阻塞 &#43; 同步的通信模式。
+《精尽 Netty 源码分析 —— NIO 基础（一）之简介》
+🦅 原理
+NIO 相对于 BIO 来说一大进步。客户端和服务器之间通过 Channel 通信。NIO 可以在 Channel 进行读写操作。这些 Channel 都会被注册在 Selector 多路复用器上。Selector 通过一个线程不停的轮询这些 Channel 。找出已经准备就绪的 Channel 执行 IO 操作。">
+    <link rel="shortcut icon" href="img/favicon.ico" />
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "light");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/myblog/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/myblog/img/avatar_hu41e9bf84b16d248cd89556079ae4f725_243458_300x0_resize_box_3.png" width="300"
+                            height="442" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">🍥</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/myblog">TauZZ&#39;s Blog</a></h1>
+            <h2 class="site-description">加油努力.✍️</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='https://img.picgo.net/2023/05/09/3b2ebde1c8640d69530516428a740b82ea5623263a52eda.jpeg'
+                        target="_blank"
+                        title="Dreamq0p"
+                        rel="me"
+                    >
+                        
+                        
+                            <?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1683196971239" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2753" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M1024 624.6c0-149.9-142.3-271.8-317.2-271.8s-317.2 122-317.2 271.8c0 149.9 142.3 271.8 317.2 271.8 30.4 0 60.5-3.7 89.4-10.9 7.9 1.1 30.2 13 43.7 20.2 29.4 15.6 49.6 25.8 65.9 25.8 5.2 0 9.9-1 14.4-3.2 24.9-12.1 15-43.1 5.5-73.1-2.5-8-6.5-20.4-7.8-27.7C985.5 776 1024 702.4 1024 624.6z m-137.5 173c-19.4 14.1-11.1 40.2-1.5 70.5 1.3 4.2 3 9.5 4.5 14.7-9.7-4.4-21.1-10.5-29.4-14.9-29.3-15.6-48.5-25.3-64.3-25.3-3 0-5.8 0.3-8.6 1.1-25.9 6.6-52.9 10-80.3 10-151.3 0-274.3-102.7-274.3-229s123.1-229 274.3-229 274.3 102.7 274.3 229c-0.1 66.3-34.6 129.3-94.7 172.9z" p-id="2754" fill="#bfbfbf"></path><path d="M379.1 621.5c0-150.7 146.6-273.7 326.7-274.1 6.9 0 13.4-3.4 17.4-9 4-5.7 5-12.9 2.8-19.4-22.4-64.5-69.6-122.4-132.7-163-64.6-41.5-141.5-63.5-222.6-63.5C166.3 92.5 0 234.8 0 409.7c0 91.4 45.7 177.7 125.5 238-1.2 8.5-6.4 25-9.7 35.5-11.2 35.4-21.8 68.9 4.5 81.7 4.8 2.3 9.8 3.4 15.4 3.4 18.3 0 41.7-11.8 76-30 16.8-8.9 44.7-23.7 53.7-24.3 34.1 8.6 69.5 13 105.4 13h1.3c6.9 0 13.5-3.4 17.5-9 4-5.7 5-12.9 2.8-19.5-8.8-25.2-13.3-51-13.3-77z m-42.8 0c0 20.7 2.4 41.3 7 61.5-23.2-1.6-46.1-5.3-68.3-11-19.4-5-44.3 7.5-83.4 28.3-12.1 6.4-29.7 15.8-42.5 21 2.1-8.3 5.3-18.2 7.5-25.3 10.9-34.4 20.3-64-0.4-79-72-52.2-113.3-127.8-113.3-207.3 0-151.3 147.1-274.3 327.9-274.3 133.2 0 253.5 68.8 303.4 170.4-189 14.1-337.9 150.5-337.9 315.7z" p-id="2755" fill="#bfbfbf"></path><path d="M249.9 305.3m-42.9 0a42.9 42.9 0 1 0 85.8 0 42.9 42.9 0 1 0-85.8 0Z" p-id="2756" fill="#bfbfbf"></path><path d="M493.9 305.3m-42.9 0a42.9 42.9 0 1 0 85.8 0 42.9 42.9 0 1 0-85.8 0Z" p-id="2757" fill="#bfbfbf"></path><path d="M614.9 548.2m-34.3 0a34.3 34.3 0 1 0 68.6 0 34.3 34.3 0 1 0-68.6 0Z" p-id="2758" fill="#bfbfbf"></path><path d="M806.7 548.2m-34.3 0a34.3 34.3 0 1 0 68.6 0 34.3 34.3 0 1 0-68.6 0Z" p-id="2759" fill="#bfbfbf"></path></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/Tauzi'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/myblog/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>主页</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/myblog/%E5%85%B3%E4%BA%8E/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>关于</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/myblog/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>归档</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/myblog/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>搜索</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/myblog/%E5%8F%8B%E9%93%BE/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>友链</span>
+            </a>
+        </li>
+        
+
+        <div class="menu-bottom-section">
+            
+            
+                <li id="dark-mode-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                    <span>暗色模式</span>
+                </li>
+            
+        </div>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#bio-是什么">BIO 是什么？</a></li>
+    <li><a href="#nio-是什么">NIO 是什么？</a></li>
+    <li><a href="#aio-是什么">AIO 是什么？</a></li>
+    <li><a href="#bionio-有什么区别">BIO、NIO 有什么区别？</a></li>
+    <li><a href="#什么是-netty-">什么是 Netty ？</a></li>
+    <li><a href="#为什么选择-netty-">为什么选择 Netty ？</a></li>
+    <li><a href="#为什么说-netty-使用简单">为什么说 Netty 使用简单？</a></li>
+    <li><a href="#说说业务中-netty-的使用场景">说说业务中 Netty 的使用场景？</a></li>
+    <li><a href="#说说-netty-如何实现高性能">说说 Netty 如何实现高性能？</a></li>
+    <li><a href="#netty-的高性能如何体现">Netty 的高性能如何体现？</a></li>
+    <li><a href="#netty-的高可靠如何体现">Netty 的高可靠如何体现？</a></li>
+    <li><a href="#netty-的可扩展如何体现">Netty 的可扩展如何体现？</a></li>
+    <li><a href="#简单介绍-netty-的核心组件">简单介绍 Netty 的核心组件？</a></li>
+    <li><a href="#说说-netty-的逻辑架构">说说 Netty 的逻辑架构？</a></li>
+    <li><a href="#什么是-reactor-模型">什么是 Reactor 模型？</a></li>
+    <li><a href="#请介绍-netty-的线程模型">请介绍 Netty 的线程模型？</a></li>
+    <li><a href="#什么是业务线程池">什么是业务线程池？</a></li>
+    <li><a href="#tcp-粘包--拆包的原因应该这么解决">TCP 粘包 / 拆包的原因？应该这么解决？</a></li>
+    <li><a href="#了解哪几种序列化协议">了解哪几种序列化协议？</a></li>
+    <li><a href="#netty-的零拷贝实现">Netty 的零拷贝实现？</a></li>
+    <li><a href="#原生的-nio-存在-epoll-bug-是什么netty-是怎么解决的">原生的 NIO 存在 Epoll Bug 是什么？Netty 是怎么解决的？</a></li>
+    <li><a href="#什么是-netty-空闲检测">什么是 Netty 空闲检测？</a></li>
+    <li><a href="#netty-如何实现重连">Netty 如何实现重连？</a></li>
+    <li><a href="#netty-自己实现的-bytebuf-有什么优点">Netty 自己实现的 ByteBuf 有什么优点？</a></li>
+    <li><a href="#netty-为什么要实现内存管理">Netty 为什么要实现内存管理？</a></li>
+    <li><a href="#netty-如何实心内存管理">Netty 如何实心内存管理？</a></li>
+    <li><a href="#什么是-netty-的内存泄露检测是如何进行实现的">什么是 Netty 的内存泄露检测？是如何进行实现的？</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/myblog/categories/netty/" >
+                Netty
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/myblog/p/netty%E9%9D%A2%E8%AF%95%E9%A2%98/">netty面试题</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">May 04, 2023</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 8 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h1 id="精尽-netty-面试题">精尽 Netty 面试题</h1>
+<p>以下面试题，转载芋道源码</p>
+<h2 id="bio-是什么">BIO 是什么？</h2>
+<p>🦅 <strong>概念</strong></p>
+<ul>
+<li>
+<p>BIO ，全称 Block-IO ，是一种<strong>阻塞</strong> + <strong>同步</strong>的通信模式。</p>
+</li>
+<li>
+<p>是一个比较传统的通信方式，模式简单，使用方便。但并发处理能力低，通信耗时，依赖网速。</p>
+</li>
+</ul>
+<p>🦅 <strong>原理</strong></p>
+<ul>
+<li>
+<p>服务器通过一个 Acceptor 线程，负责监听客户端请求和为每个客户端创建一个新的线程进行链路处理。典型的<strong>一请求一应答模式</strong>。</p>
+</li>
+<li>
+<p>若客户端数量增多，频繁地创建和销毁线程会给服务器打开很大的压力。后改良为用线程池的方式代替新增线程，被称为伪异步 IO 。</p>
+</li>
+</ul>
+<p>🦅 <strong>示例</strong></p>
+<ul>
+<li>代码参见 <a class="link" href="https://github.com/ITDragonBlog/daydayup/tree/master/Netty/socket-io/src/com/itdragon/bio"  target="_blank" rel="noopener"
+    >bio</a> 。</li>
+</ul>
+<p>🦅 <strong>小结</strong></p>
+<p>BIO 模型中，通过 Socket 和 ServerSocket 实现套接字通道的通信。阻塞，同步，建立连接耗时。</p>
+<h2 id="nio-是什么">NIO 是什么？</h2>
+<p>🦅 <strong>概念</strong></p>
+<ul>
+<li>
+<p>NIO ，全称 New IO ，也叫 Non-Block IO ，是一种<strong>非阻塞</strong> + 同步的通信模式。</p>
+</li>
+<li>
+<p><a class="link" href="/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80" >《精尽 Netty 源码分析 —— NIO 基础（一）之简介》</a></p>
+</li>
+</ul>
+<p>🦅 <strong>原理</strong></p>
+<ul>
+<li>
+<p>NIO 相对于 BIO 来说一大进步。客户端和服务器之间通过 Channel 通信。NIO 可以在 Channel 进行读写操作。这些 Channel 都会被注册在 Selector 多路复用器上。Selector 通过一个线程不停的轮询这些 Channel 。找出已经准备就绪的 Channel 执行 IO 操作。</p>
+</li>
+<li>
+<p>NIO 通过一个线程轮询，实现千万个客户端的请求，这就是非阻塞 NIO 的特点。</p>
+</li>
+<li>
+<p>服务器端只要提供一个线程负责 Selector 的轮询，就可以接入成千上万个客户端，这就是 JDK NIO 库的巨大进步。</p>
+</li>
+<li>
+<p><a class="link" href="http://svip.iocoder.cn/Netty/nio-4-selector/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码分析 —— NIO 基础（四）之 Selector》</a></p>
+</li>
+<li>
+<p>通道分为两大类：一类是网络读写（SelectableChannel），一类是用于文件操作（FileChannel）。我们使用的是前者 SocketChannel 和 ServerSocketChannel ，都是SelectableChannel 的子类。</p>
+</li>
+<li>
+<p><a class="link" href="http://svip.iocoder.cn/Netty/nio-2-channel/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码分析 —— NIO 基础（二）之 Channel》</a></p>
+</li>
+<li>
+<p>BIO 是将数据直接写入或读取到流 Stream 对象中。</p>
+</li>
+<li>
+<p>NIO 的数据操作都是在 Buffer 中进行的。Buffer 实际上是一个数组。Buffer 最常见的类型是ByteBuffer，另外还有 CharBuffer，ShortBuffer，IntBuffer，LongBuffer，FloatBuffer，DoubleBuffer。</p>
+</li>
+<li>
+<p><a class="link" href="http://svip.iocoder.cn/Netty/nio-3-buffer/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码分析 —— NIO 基础（三）之 Buffer》</a></p>
+</li>
+<li>
+<p>缓冲区 Buffer ：它是 NIO 与 BIO 的一个重要区别。</p>
+</li>
+<li>
+<p>通道 Channel ：和流 Stream 不同，通道是双向的。NIO可以通过 Channel 进行数据的读、写和同时读写操作。</p>
+</li>
+<li>
+<p>多路复用器 Selector ：NIO 编程的基础。多路复用器提供选择已经就绪的任务的能力：就是 Selector 会不断地轮询注册在其上的通道（Channel），如果某个通道处于就绪状态，会被 Selector 轮询出来，然后通过 SelectionKey 可以取得就绪的Channel集合，从而进行后续的 IO 操作。</p>
+</li>
+</ul>
+<p>🦅 <strong>示例</strong></p>
+<ul>
+<li>
+<p>代码参见 <a class="link" href="https://github.com/ITDragonBlog/daydayup/tree/master/Netty/socket-io/src/com/itdragon/nio"  target="_blank" rel="noopener"
+    >nio</a></p>
+</li>
+<li>
+<p><a class="link" href="http://svip.iocoder.cn/Netty/nio-5-demo/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码分析 —— NIO 基础（五）之示例》</a></p>
+</li>
+</ul>
+<p>🦅 <strong>小结</strong></p>
+<p>NIO 模型中通过 SocketChannel 和 ServerSocketChannel 实现套接字通道的通信。非阻塞，同步，避免为每个 TCP 连接创建一个线程。</p>
+<p>🦅 <strong>继续挖掘</strong></p>
+<p>可能有胖友对非阻塞和阻塞，同步和异步的定义有点懵逼，我们再来看下 <a class="link" href="http://svip.iocoder.cn/Netty/nio-1-intro/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码分析 —— NIO 基础（一）之简介》</a> 提到的一段话：</p>
+<blockquote>
+<p>老艿艿：在一些文章中，会将 Java NIO 描述成<strong>异步</strong> IO ，实际是不太正确的： Java NIO 是<strong>同步</strong> IO ，Java AIO ( 也称为 NIO 2 )是<strong>异步</strong> IO。具体原因，推荐阅读文章：</p>
+<ul>
+<li>
+<p><a class="link" href="https://blog.csdn.net/matthew_zhang/article/details/71328697"  target="_blank" rel="noopener"
+    >《异步和非阻塞一样吗? (内容涉及 BIO, NIO, AIO, Netty)》</a> 。</p>
+</li>
+<li>
+<p><a class="link" href="https://blog.csdn.net/skiof007/article/details/52873421"  target="_blank" rel="noopener"
+    >《BIO与NIO、AIO的区别(这个容易理解)》</a></p>
+</li>
+</ul>
+<p>总结来说，在 <strong>Unix IO 模型</strong>的语境下：</p>
+<ul>
+<li>
+<p>同步和异步的区别：数据拷贝阶段是否需要完全由操作系统处理。</p>
+</li>
+<li>
+<p>阻塞和非阻塞操作：是针对发起 IO 请求操作后，是否有立刻返回一个标志信息而不让请求线程等待。</p>
+</li>
+</ul>
+<p>因此，Java NIO 是<strong>同步</strong>且非阻塞的 IO 。</p>
+</blockquote>
+<ul>
+<li>另外，胖友在瞅瞅下面这个图来理解下：<a class="link" href="http://static.iocoder.cn/images/Netty/2017_10_24/01.png"  title="Unix 的 5 种 IO 模型"
+     target="_blank" rel="noopener"
+    ><img src="http://static.iocoder.cn/images/Netty/2017_10_24/01.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Unix 的 5 种 IO 模型"
+	
+	
+></a>Unix 的 5 种 IO 模型</li>
+</ul>
+<h2 id="aio-是什么">AIO 是什么？</h2>
+<blockquote>
+<p>艿艿：这个面试题，重点在于陈述我们对 BIO、NIO 的理解，对于 AIO 来说，基本理解即可。</p>
+</blockquote>
+<p>🦅 <strong>概念</strong></p>
+<ul>
+<li>
+<p>AIO ，全称 Asynchronous IO ，也叫 NIO<strong>2</strong> ，是一种<strong>非阻塞</strong> + <strong>异步</strong>的通信模式。在 NIO 的基础上，引入了新的异步通道的概念，并提供了异步文件通道和异步套接字通道的实现。</p>
+</li>
+<li>
+<p>原理：</p>
+</li>
+<li>
+<p>AIO 并没有采用 NIO 的多路复用器，而是使用异步通道的概念。其 read，write 方法的返回类型，都是 Future 对象。而 Future 模型是异步的，其核心思想是：<strong>去主函数等待时间</strong>。</p>
+</li>
+</ul>
+<p>🦅 <strong>示例</strong></p>
+<ul>
+<li>代码参见 <a class="link" href="https://github.com/ITDragonBlog/daydayup/tree/master/Netty/socket-io/src/com/itdragon/aio"  target="_blank" rel="noopener"
+    >aio</a></li>
+</ul>
+<p>🦅 <strong>小结</strong></p>
+<p>AIO 模型中通过 AsynchronousSocketChannel 和 AsynchronousServerSocketChannel 实现套接字通道的通信。非阻塞，异步。</p>
+<h2 id="bionio-有什么区别">BIO、NIO 有什么区别？</h2>
+<ul>
+<li>
+<p>线程模型不同</p>
+</li>
+<li>
+<p>BIO：一个连接一个线程，客户端有连接请求时服务器端就需要启动一个线程进行处理。所以，线程开销大。可改良为用线程池的方式代替新创建线程，被称为伪异步 IO 。</p>
+</li>
+<li>
+<p>NIO：一个请求一个线程，但客户端发送的连接请求都会注册到多路复用器上，多路复用器轮询到连接有新的 I/O 请求时，才启动一个线程进行处理。可改良为一个线程处理多个请求，基于 <a class="link" href="http://svip.iocoder.cn/Netty/EventLoop-1-Reactor-Model/"  target="_blank" rel="noopener"
+    >多 Reactor 模型</a>。</p>
+</li>
+<li>
+<p>BIO 是面向流( Stream )的，而 NIO 是面向缓冲区( Buffer )的。</p>
+</li>
+<li>
+<p>BIO 的各种操作是阻塞的，而 NIO 的各种操作是非阻塞的。</p>
+</li>
+<li>
+<p>BIO 的 Socket 是单向的，而 NIO 的 Channel 是双向的。</p>
+</li>
+</ul>
+<p>可能文字比较难记，整理出来就是下图：<a class="link" href="http://static.iocoder.cn/images/Netty/2017_10_24/02.png"  title="BIO 对比 NIO 对比 AIO"
+     target="_blank" rel="noopener"
+    ><img src="http://static.iocoder.cn/images/Netty/2017_10_24/02.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="BIO 对比 NIO 对比 AIO"
+	
+	
+></a>BIO 对比 NIO 对比 AIO</p>
+<ul>
+<li>有一点要注意，虽然图中说 NIO 的性能一般，但是在绝大多数我们日常业务场景，NIO 和 AIO 的性能差距实际没这么大。在 Netty5 中，基于 AIO 改造和支持，最后发现，性能并没有想象中这么强悍，所以 Netty5 被废弃，而是继续保持 Netty4 为主版本，使用 NIO 为主。</li>
+</ul>
+<p>为了胖友能更好的记住和理解 BIO、NIO、AIO 的流程，胖友可以在理解下图：<a class="link" href="http://static.iocoder.cn/images/Netty/2017_10_24/03.png"  title="BIO、NIO、AIO 的流程图"
+     target="_blank" rel="noopener"
+    ><img src="http://static.iocoder.cn/images/Netty/2017_10_24/03.png"
+	
+	
+	
+	loading="lazy"
+	
+		alt="BIO、NIO、AIO 的流程图"
+	
+	
+></a>BIO、NIO、AIO 的流程图</p>
+<h2 id="什么是-netty-">什么是 Netty ？</h2>
+<blockquote>
+<p>Netty 是一款提供异步的、事件驱动的网络应用程序框架和工具，用以快速开发高性能、高可靠性的网络服务器和客户端程序。</p>
+<p>也就是说，Netty 是一个基于 NIO 的客户、服务器端编程框架。使用 Netty 可以确保你快速和简单地开发出一个网络应用，例如实现了某种协议的客户，服务端应用。Netty 相当简化和流线化了网络应用的编程开发过程，例如，TCP 和 UDP 的 socket 服务开发。</p>
+<p>（以上摘自百度百科）。</p>
+</blockquote>
+<p>Netty 具有如下特性( 摘自《Netty in Action》 )</p>
+<p>分类</p>
+<p>Netty的特性</p>
+<p>设计</p>
+<p>1. 统一的 API ，支持多种传输类型( 阻塞和非阻塞的 ) <!-- raw HTML omitted --> 2. 简单而强大的线程模型 <!-- raw HTML omitted --> 3. 真正的无连接数据报套接字( UDP )支持 <!-- raw HTML omitted --> 4. 连接逻辑组件( ChannelHander 中顺序处理消息 )以及组件复用( 一个 ChannelHandel 可以被多个ChannelPipeLine 复用 )</p>
+<p>易于使用</p>
+<p>1. 详实的 Javadoc 和大量的示例集 <!-- raw HTML omitted --> 2. 不需要超过 JDK 1.6+ 的依赖</p>
+<p>性能</p>
+<p>拥有比 Java 的核心 API 更高的吞吐量以及更低的延迟( 得益于池化和复用 )，更低的资源消耗以及最少的内存复制</p>
+<p>健壮性</p>
+<p>1. 不会因为慢速、快速或者超载的连接而导致 OutOfMemoryError <!-- raw HTML omitted --> 2. 消除在高速网络中 NIO 应用程序常见的不公平读 / 写比率</p>
+<p>安全性</p>
+<p>完整的 SSL/TLS 以及 StartTLs 支持，可用于受限环境下，如 Applet 和 OSGI</p>
+<p>社区驱动</p>
+<p>发布快速而且频繁</p>
+<h2 id="为什么选择-netty-">为什么选择 Netty ？</h2>
+<ul>
+<li>
+<p><strong>使用简单</strong>：API 使用简单，开发门槛低。</p>
+</li>
+<li>
+<p><strong>功能强大</strong>：预置了多种编解码功能，支持多种主流协议。</p>
+</li>
+<li>
+<p><strong>定制能力强</strong>：可以通过 ChannelHandler 对通信框架进行灵活的扩展。</p>
+</li>
+<li>
+<p><strong>性能高</strong>：通过与其它业界主流的 NIO 框架对比，Netty 的综合性能最优。</p>
+</li>
+<li>
+<p><strong>成熟稳定</strong>：Netty 修复了已经发现的所有 JDK NIO BUG，业务开发人员不需要再为 NIO 的 BUG 而烦恼。</p>
+</li>
+<li>
+<p><strong>社区活跃</strong>：版本迭代周期短，发现的BUG可以被及时修复，同时，更多的新功能会被加入。</p>
+</li>
+<li>
+<p><strong>案例丰富</strong>：经历了大规模的商业应用考验，质量已经得到验证。在互联网、大数据、网络游戏、企业应用、电信软件等众多行业得到成功商用，证明了它可以完全满足不同行业的商业应用。</p>
+</li>
+</ul>
+<p>实际上，这个也是我们做技术选型的一些参考点，不仅仅适用于 Netty ，也同样适用于其他技术栈。当然，😈 面试都可以酱紫回答，显得很高端。</p>
+<h2 id="为什么说-netty-使用简单">为什么说 Netty 使用简单？</h2>
+<p>🦅 我们假设要搭建一个 Server 服务器，使用 <strong>Java NIO 的步骤</strong>如下：</p>
+<ol>
+<li>创建 ServerSocketChannel 。</li>
+</ol>
+<ul>
+<li>绑定监听端口，并配置为非阻塞模式。</li>
+</ul>
+<ol start="3">
+<li>创建 Selector，将之前创建的 ServerSocketChannel 注册到 Selector 上，监听 <code>SelectionKey.OP_ACCEPT</code> 。</li>
+</ol>
+<ul>
+<li>循环执行 <code>Selector#select()</code> 方法，轮询就绪的 Channel。</li>
+</ul>
+<ol start="5">
+<li>轮询就绪的 Channel 时，如果是处于 <code>OP_ACCEPT</code> 状态，说明是新的客户端接入，调用 <code>ServerSocketChannel#accept()</code> 方法，接收新的客户端。</li>
+</ol>
+<ul>
+<li>设置新接入的 SocketChannel 为非阻塞模式，并注册到 Selector 上，监听 <code>OP_READ</code> 。</li>
+</ul>
+<ol start="7">
+<li>如果轮询的 Channel 状态是 <code>OP_READ</code> ，说明有新的就绪数据包需要读取，则构造 ByteBuffer 对象，读取数据。</li>
+</ol>
+<ul>
+<li>这里，解码数据包的过程，需要我们自己编写。</li>
+</ul>
+<blockquote>
+<p>艿艿：注意噢，上述步骤还是最简的 Java NIO 启动步骤，不包括<strong>多 Reactor 多线程模型</strong>噢！可能有胖友不知道什么是 Reactor 模型，在 <a class="link" href="http://svip.iocoder.cn/Netty/Interview/#"  target="_blank" rel="noopener"
+    >「什么是 Reactor 模型？」</a> 问题中，我们会详细解释。</p>
+</blockquote>
+<p>🦅 使用 <strong>Netty 的步骤</strong>如下：</p>
+<ol>
+<li>创建 NIO 线程组 EventLoopGroup 和 ServerBootstrap。</li>
+</ol>
+<ul>
+<li>
+<p>设置 ServerBootstrap 的属性：线程组、SO_BACKLOG 选项，设置 NioServerSocketChannel 为 Channel</p>
+</li>
+<li>
+<p>设置业务处理 Handler 和 编解码器 Codec 。</p>
+</li>
+<li>
+<p>绑定端口，启动服务器程序。</p>
+</li>
+</ul>
+<ol start="3">
+<li>在业务处理 Handler 中，处理客户端发送的数据，并给出响应。</li>
+</ol>
+<p>🦅 那么相比 Java NIO，使用 Netty 开发程序，都<strong>简化了哪些步骤</strong>呢？</p>
+<ol>
+<li>
+<p>无需关心 <code>OP_ACCEPT</code>、<code>OP_READ</code>、<code>OP_WRITE</code> 等等 <strong>IO 操作</strong>，Netty 已经封装，对我们在使用是透明无感的。</p>
+</li>
+<li>
+<p>使用 boss 和 worker EventLoopGroup ，Netty 直接提供<strong>多 Reactor 多线程模型</strong>。</p>
+</li>
+<li>
+<p>在 Netty 中，我们看到有使用一个解码器 FixedLengthFrameDecoder，可以用于处理定长消息的问题，能够解决 <strong>TCP 粘包拆包</strong>问题，十分方便。如果使用 Java NIO ，需要我们自行实现解码器。</p>
+</li>
+</ol>
+<hr>
+<p>😈 如果胖友不知道如何使用 Java NIO 编写一个 Server ，建议自己去实现以下。 😈 如果胖友没有使用过 Netty 编写一个 Server ，建议去入门下。</p>
+<h2 id="说说业务中-netty-的使用场景">说说业务中 Netty 的使用场景？</h2>
+<ul>
+<li>
+<p>构建高性能、低时延的各种 Java 中间件，Netty 主要作为基础通信框架提供高性能、低时延的通信服务。例如：</p>
+</li>
+<li>
+<p>RocketMQ ，分布式消息队列。</p>
+</li>
+<li>
+<p>Dubbo ，服务调用框架。</p>
+</li>
+<li>
+<p>Spring WebFlux ，基于响应式的 Web 框架。</p>
+</li>
+<li>
+<p>HDFS ，分布式文件系统。</p>
+</li>
+<li>
+<p>公有或者私有协议栈的基础通信框架，例如可以基于 Netty 构建异步、高性能的 WebSocket、Protobuf 等协议的支持。</p>
+</li>
+<li>
+<p>各领域应用，例如大数据、游戏等，Netty 作为高性能的通信框架用于内部各模块的数据分发、传输和汇总等，实现模块之间高性能通信。</p>
+</li>
+</ul>
+<h2 id="说说-netty-如何实现高性能">说说 Netty 如何实现高性能？</h2>
+<ol>
+<li>
+<p><strong>线程模型</strong> ：更加优雅的 Reactor 模式实现、灵活的线程模型、利用 EventLoop 等创新性的机制，可以非常高效地管理成百上千的 Channel 。</p>
+</li>
+<li>
+<p><strong>内存池设计</strong> ：使用池化的 Direct Buffer 等技术，在提高 IO 性能的同时，减少了对象的创建和销毁。并且，内吃吃的内部实现是用一颗二叉查找树，更好的管理内存分配情况。</p>
+</li>
+<li>
+<p><strong>内存零拷贝</strong> ：使用 Direct Buffer ，可以使用 Zero-Copy 机制。</p>
+<blockquote>
+<p>Zero-Copy ，在操作数据时，不需要将数据 Buffer 从一个内存区域拷贝到另一个内存区域。因为少了一次内存的拷贝，因此 CPU 的效率就得到的提升。</p>
+</blockquote>
+</li>
+<li>
+<p><strong>协议支持</strong> ：提供对 Protobuf 等高性能序列化协议支持。</p>
+</li>
+<li>
+<p><strong>使用更多本地代码</strong>。例如：</p>
+</li>
+</ol>
+<ul>
+<li>
+<p>直接利用 JNI 调用 Open SSL 等方式，获得比 Java 内建 SSL 引擎更好的性能。</p>
+</li>
+<li>
+<p>利用 JNI 提供了 Native Socket Transport ，在使用 Epoll edge-triggered 的情况下，可以有一定的性能提升。</p>
+</li>
+</ul>
+<ol start="7">
+<li>其它：</li>
+</ol>
+<ul>
+<li>
+<p>利用反射等技术直接操纵 SelectionKey ，使用数组而不是 Java 容器等。</p>
+</li>
+<li>
+<p>实现 <a class="link" href="https://segmentfault.com/a/1190000012926809"  target="_blank" rel="noopener"
+    >FastThreadLocal</a> 类，当请求频繁时，带来更好的性能。</p>
+</li>
+<li>
+<p>&hellip;.</p>
+</li>
+</ul>
+<p>另外，推荐阅读白衣大大的两篇文章：</p>
+<ol>
+<li>
+<p><a class="link" href="http://calvin1978.blogcn.com/articles/netty-performance.html"  target="_blank" rel="noopener"
+    >《Netty高性能编程备忘录(上)》</a></p>
+</li>
+<li>
+<p><a class="link" href="http://calvin1978.blogcn.com/articles/netty-performance2.html"  target="_blank" rel="noopener"
+    >《Netty高性能编程备忘录（下）》</a></p>
+</li>
+</ol>
+<blockquote>
+<p>下面三连问！</p>
+<p>Netty 是一个高性能的、高可靠的、可扩展的异步通信框架，那么高性能、高可靠、可扩展设计体现在哪里呢？</p>
+</blockquote>
+<h2 id="netty-的高性能如何体现">Netty 的高性能如何体现？</h2>
+<blockquote>
+<p>这个问题，和 <a class="link" href="http://svip.iocoder.cn/Netty/Interview/#"  target="_blank" rel="noopener"
+    >「说说 Netty 如何实现高性能？」</a> 问题，会有点重叠。没事，反正理解就好，也背不下来。哈哈哈哈。</p>
+</blockquote>
+<p>性能是设计出来的，而不是测试出来的。那么，Netty 的架构设计是如何实现高性能的呢？</p>
+<ol>
+<li>
+<p><strong>线程模型</strong> ：采用异步非阻塞的 I/O 类库，基于 Reactor 模式实现，解决了传统同步阻塞 I/O 模式下服务端无法平滑处理客户端线性增长的问题。</p>
+</li>
+<li>
+<p><strong>堆外内存</strong> ：TCP 接收和发送缓冲区采用直接内存代替堆内存，避免了内存复制，提升了 I/O 读取和写入性能。</p>
+</li>
+<li>
+<p><strong>内存池设计</strong> ：支持通过内存池的方式循环利用 ByteBuf，避免了频繁创建和销毁 ByteBuf 带来的性能消耗。</p>
+</li>
+<li>
+<p><strong>参数配置</strong> ：可配置的 I/O 线程数目和 TCP 参数等，为不同用户提供定制化的调优参数，满足不同的性能场景。</p>
+</li>
+<li>
+<p><strong>队列优化</strong> ：采用环形数组缓冲区，实现无锁化并发编程，代替传统的线程安全容器或锁。</p>
+</li>
+<li>
+<p><strong>并发能力</strong> ：合理使用线程安全容器、原子类等，提升系统的并发能力。</p>
+</li>
+<li>
+<p><strong>降低锁竞争</strong> ：关键资源的使用采用单线程串行化的方式，避免多线程并发访问带来的锁竞争和额外的 CPU 资源消耗问题。</p>
+</li>
+<li>
+<p><strong>内存泄露检测</strong> ：通过引用计数器及时地释放不再被引用的对象，细粒度的内存管理降低了 GC 的频率，减少频繁 GC 带来的时延增大和 CPU 损耗。</p>
+</li>
+</ol>
+<ul>
+<li><a class="link" href="http://svip.iocoder.cn/Netty/ByteBuf-1-3-ByteBuf-resource-leak-detector/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— Buffer 之 ByteBuf（三）内存泄露检测》</a></li>
+</ul>
+<h2 id="netty-的高可靠如何体现">Netty 的高可靠如何体现？</h2>
+<ol>
+<li><strong>链路有效性检测</strong>：由于长连接不需要每次发送消息都创建链路，也不需要在消息完成交互时关闭链路，因此相对于短连接性能更高。为了保证长连接的链路有效性，往往需要通过心跳机制周期性地进行链路检测。使用心跳机制的原因是，避免在系统空闲时因网络闪断而断开连接，之后又遇到海量业务冲击导致消息积压无法处理。为了解决这个问题，需要周期性地对链路进行有效性检测，一旦发现问题，可以及时关闭链路，重建 TCP 连接。为了支持心跳，Netty 提供了两种链路空闲检测机制：</li>
+</ol>
+<ul>
+<li>
+<p>读空闲超时机制：连续 T 周期没有消息可读时，发送心跳消息，进行链路检测。如果连续 N 个周期没有读取到心跳消息，可以主动关闭链路，重建连接。</p>
+</li>
+<li>
+<p>写空闲超时机制：连续 T 周期没有消息需要发送时，发送心跳消息，进行链路检测。如果连续 N 个周期没有读取对方发回的心跳消息，可以主动关闭链路，重建连接。</p>
+</li>
+<li>
+<p><a class="link" href="http://svip.iocoder.cn/Netty/ChannelHandler-5-idle/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— ChannelHandler（五）之 IdleStateHandler》</a></p>
+</li>
+</ul>
+<ol start="3">
+<li><strong>内存保护机制</strong>：Netty 提供多种机制对内存进行保护，包括以下几个方面：</li>
+</ol>
+<ul>
+<li>
+<p>通过对象引用计数器对 ByteBuf 进行细粒度的内存申请和释放，对非法的对象引用进行检测和保护。</p>
+</li>
+<li>
+<p>可设置的内存容量上限，包括 ByteBuf、线程池线程数等，避免异常请求耗光内存。</p>
+</li>
+</ul>
+<ol start="5">
+<li><strong>优雅停机</strong>：优雅停机功能指的是当系统推出时，JVM 通过注册的 Shutdown Hook 拦截到退出信号量，然后执行推出操作，释放相关模块的资源占用，将缓冲区的消息处理完成或清空，将待刷新的数据持久化到磁盘和数据库中，等到资源回收和缓冲区消息处理完成之后，再退出。</li>
+</ol>
+<ul>
+<li><a class="link" href="http://svip.iocoder.cn/Netty/EventLoop-8-EventLoop-shutdown/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— EventLoop（八）之 EventLoop 优雅关闭》</a></li>
+</ul>
+<h2 id="netty-的可扩展如何体现">Netty 的可扩展如何体现？</h2>
+<p>可定制、易扩展。</p>
+<ul>
+<li>
+<p><strong>责任链模式</strong> ：ChannelPipeline 基于责任链模式开发，便于业务逻辑的拦截、定制和扩展。</p>
+</li>
+<li>
+<p><strong>基于接口的开发</strong> ：关键的类库都提供了接口或抽象类，便于用户自定义实现。</p>
+</li>
+<li>
+<p><strong>提供大量的工厂类</strong> ：通过重载这些工厂类，可以按需创建出用户需要的对象。</p>
+</li>
+<li>
+<p><strong>提供大量系统参数</strong> ：供用户按需设置，增强系统的场景定制性。</p>
+</li>
+</ul>
+<hr>
+<blockquote>
+<p>艿艿：说个题外话。</p>
+<p>实际上，任何的技术的研究，我们都可以去思考，它的高性能是怎么体现的，它的可靠性是怎么体现的，它的可拓展是怎么体现的。</p>
+<p>当然，因为很多时候有近义词，所以：</p>
+<ul>
+<li>
+<p>高性能 =&gt; 高并发</p>
+</li>
+<li>
+<p>可靠性 =&gt; 高可用</p>
+</li>
+<li>
+<p>可拓展 =&gt; 高拓展</p>
+</li>
+</ul>
+<p>例如说，MySQL 如何实现高性能，MySQL 如何搭建高可用，😈 MySQL 如何做拓展貌似暂时没，哈哈哈哈。</p>
+</blockquote>
+<h2 id="简单介绍-netty-的核心组件">简单介绍 Netty 的核心组件？</h2>
+<p>Netty 有如下六个核心组件：</p>
+<ul>
+<li>
+<p>Bootstrap &amp; ServerBootstrap</p>
+</li>
+<li>
+<p>Channel</p>
+</li>
+<li>
+<p>ChannelFuture</p>
+</li>
+<li>
+<p>EventLoop &amp; EventLoopGroup</p>
+</li>
+<li>
+<p>ChannelHandler</p>
+</li>
+<li>
+<p>ChannelPipeline</p>
+</li>
+</ul>
+<p>详细的，请直接阅读 <a class="link" href="http://svip.iocoder.cn/Netty/intro-2/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码分析 —— Netty 简介（二）之核心组件》</a> 一文。</p>
+<h2 id="说说-netty-的逻辑架构">说说 Netty 的逻辑架构？</h2>
+<p>Netty 采用了典型的<strong>三层网络架构</strong>进行设计和开发，其逻辑架构如下图所示：</p>
+<p><a class="link" href="http://static.iocoder.cn/85d98e3cb0e6e39f80d02234e039a4dd"  title="Netty 逻辑架构图"
+     target="_blank" rel="noopener"
+    ><img src="http://static.iocoder.cn/85d98e3cb0e6e39f80d02234e039a4dd"
+	
+	
+	
+	loading="lazy"
+	
+		alt="Netty 逻辑架构图"
+	
+	
+></a>Netty 逻辑架构图</p>
+<blockquote>
+<p>艿艿：注意，这个图是自下向上看。哈哈哈~</p>
+</blockquote>
+<ol>
+<li>
+<p><strong>Reactor 通信调度层</strong>：由一系列辅助类组成，包括 Reactor 线程 NioEventLoop 及其父类，NioSocketChannel 和 NioServerSocketChannel 等等。该层的职责就是监听网络的读写和连接操作，负责将网络层的数据读到内存缓冲区，然后触发各自网络事件，例如连接创建、连接激活、读事件、写事件等。将这些事件触发到 pipeline 中，由 pipeline 管理的职责链来进行后续的处理。</p>
+</li>
+<li>
+<p><strong>职责链 ChannelPipeline</strong>：负责事件在职责链中的有序传播，以及负责动态地编排职责链。职责链可以选择监听和处理自己关心的事件，拦截处理和向后传播事件。</p>
+</li>
+<li>
+<p><strong>业务逻辑编排层</strong>：业务逻辑编排层通常有两类，一类是纯粹的业务逻辑编排，一类是应用层协议插件，用于特定协议相关的会话和链路管理。由于应用层协议栈往往是开发一次到处运行，并且变动较小，故而将应用协议到 POJO 的转变和上层业务放到不同的 ChannelHandler 中，就可以实现协议层和业务逻辑层的隔离，实现架构层面的分层隔离。</p>
+</li>
+</ol>
+<h2 id="什么是-reactor-模型">什么是 Reactor 模型？</h2>
+<p>直接阅读 <a class="link" href="http://svip.iocoder.cn/Netty/EventLoop-1-Reactor-Model/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— EventLoop（一）之 Reactor 模型》</a> 一文。</p>
+<p>认真仔细读，这是一个高频面试题。</p>
+<h2 id="请介绍-netty-的线程模型">请介绍 Netty 的线程模型？</h2>
+<p>还是阅读 <a class="link" href="http://svip.iocoder.cn/Netty/EventLoop-1-Reactor-Model/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— EventLoop（一）之 Reactor 模型》</a> 一文。</p>
+<p>认真仔细读，这真的真的真的是一个高频面试题。</p>
+<h2 id="什么是业务线程池">什么是业务线程池？</h2>
+<p>🦅 <strong>问题</strong></p>
+<p>在 <a class="link" href="http://svip.iocoder.cn/Netty/Interview/#"  target="_blank" rel="noopener"
+    >「什么是 Reactor 模型？」</a> 问题中，无论是那种类型的 Reactor 模型，都需要在 Reactor 所在的线程中，进行读写操作。那么此时就会有一个问题，如果我们读取到数据，需要进行业务逻辑处理，并且这个业务逻辑需要对数据库、缓存等等进行操作，会有什么问题呢？假设这个数据库操作需要 5 ms ，那就意味着这个 Reactor 线程在这 5 ms 无法进行注册在这个 Reactor 的 Channel 进行读写操作。也就是说，多个 Channel 的所有读写操作都变成了串行。势必，这样的效率会非常非常非常的低。</p>
+<p>🦅 <strong>解决</strong></p>
+<p>那么怎么解决呢？创建业务线程池，将读取到的数据，提交到业务线程池中进行处理。这样，Reactor 的 Channel 就不会被阻塞，而 Channel 的所有读写操作都变成了并行了。</p>
+<p>🦅 <strong>案例</strong></p>
+<p>如果胖友熟悉 Dubbo 框架，就会发现 <a class="link" href="http://dubbo.apache.org/zh-cn/docs/user/demos/thread-model.html"  target="_blank" rel="noopener"
+    >《Dubbo 用户指南 —— 线程模型》</a> 。😈 认真读下，可以跟面试官吹一吹啦。</p>
+<h2 id="tcp-粘包--拆包的原因应该这么解决">TCP 粘包 / 拆包的原因？应该这么解决？</h2>
+<p>🦅 <strong>概念</strong></p>
+<p>TCP 是以流的方式来处理数据，所以会导致粘包 / 拆包。</p>
+<ul>
+<li>
+<p>拆包：一个完整的包可能会被 TCP 拆分成多个包进行发送。</p>
+</li>
+<li>
+<p>粘包：也可能把小的封装成一个大的数据包发送。</p>
+</li>
+</ul>
+<p>🦅 <strong>原因</strong></p>
+<ul>
+<li>
+<p>应用程序写入的字节大小大于套接字发送缓冲区的大小，会发生<strong>拆包</strong>现象。而应用程序写入数据小于套接字缓冲区大小，网卡将应用多次写入的数据发送到网络上，这将会发生<strong>粘包</strong>现象。</p>
+</li>
+<li>
+<p>待发送数据大于 MSS（最大报文长度），TCP 在传输前将进行<strong>拆包</strong>。</p>
+</li>
+<li>
+<p>以太网帧的 payload（净荷）大于 MTU（默认为 1500 字节）进行 IP 分片<strong>拆包</strong>。</p>
+</li>
+<li>
+<p>接收数据端的应用层没有及时读取接收缓冲区中的数据，将发生<strong>粘包</strong>。</p>
+</li>
+</ul>
+<p>🦅 <strong>解决</strong></p>
+<p>在 Netty 中，提供了多个 Decoder 解析类，如下：</p>
+<ul>
+<li>
+<p>① FixedLengthFrameDecoder ，基于<strong>固定长度</strong>消息进行粘包拆包处理的。</p>
+</li>
+<li>
+<p>② LengthFieldBasedFrameDecoder ，基于<strong>消息头指定消息长度</strong>进行粘包拆包处理的。</p>
+</li>
+<li>
+<p>③ LineBasedFrameDecoder ，基于<strong>换行</strong>来进行消息粘包拆包处理的。</p>
+</li>
+<li>
+<p>④ DelimiterBasedFrameDecoder ，基于<strong>指定消息边界方式</strong>进行粘包拆包处理的。</p>
+</li>
+</ul>
+<p>实际上，上述四个 FrameDecoder 实现可以进行规整：</p>
+<ul>
+<li>
+<p>① 是 ② 的特例，<strong>固定长度</strong>是<strong>消息头指定消息长度</strong>的一种形式。</p>
+</li>
+<li>
+<p>③ 是 ④ 的特例，<strong>换行</strong>是于<strong>指定消息边界方式</strong>的一种形式。</p>
+</li>
+</ul>
+<p>感兴趣的胖友，可以看看如下两篇文章：</p>
+<ul>
+<li>
+<p><a class="link" href="http://svip.iocoder.cn/Netty/Codec-1-1-ByteToMessageDecoder-core-impl/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— Codec 之 ByteToMessageDecoder（一）Cumulator》</a></p>
+</li>
+<li>
+<p><a class="link" href="http://svip.iocoder.cn/Netty/Codec-1-2-ByteToMessageDecoder-FrameDecoder/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— Codec 之 ByteToMessageDecoder（二）FrameDecoder》</a></p>
+</li>
+</ul>
+<h2 id="了解哪几种序列化协议">了解哪几种序列化协议？</h2>
+<p>🦅 <strong>概念</strong></p>
+<ul>
+<li>
+<p>序列化（编码），是将对象序列化为二进制形式（字节数组），主要用于网络传输、数据持久化等。</p>
+</li>
+<li>
+<p>反序列化（解码），则是将从网络、磁盘等读取的字节数组还原成原始对象，主要用于网络传输对象的解码，以便完成远程调用。</p>
+</li>
+</ul>
+<p>🦅 <strong>选型</strong></p>
+<p>在选择序列化协议的选择，主要考虑以下三个因素：</p>
+<ul>
+<li>
+<p>序列化后的<strong>字节大小</strong>。更少的字节数，可以减少网络带宽、磁盘的占用。</p>
+</li>
+<li>
+<p>序列化的<strong>性能</strong>。对 CPU、内存资源占用情况。</p>
+</li>
+<li>
+<p>是否支持<strong>跨语言</strong>。例如，异构系统的对接和开发语言切换。</p>
+</li>
+</ul>
+<p>🦅 <strong>方案</strong></p>
+<blockquote>
+<p>如果对序列化工具了解不多的胖友，可能一看有这么多优缺点会比较懵逼，可以先记得有哪些序列化工具，然后在慢慢熟悉它们的优缺点。</p>
+<p>重点，还是知道【<strong>选型</strong>】的考虑点。</p>
+</blockquote>
+<ol>
+<li>【重点】Java 默认提供的序列化</li>
+</ol>
+<ul>
+<li>无法跨语言；序列化后的字节大小太大；序列化的性能差。</li>
+</ul>
+<ol start="3">
+<li>【重点】XML 。</li>
+</ol>
+<ul>
+<li>
+<p>优点：人机可读性好，可指定元素或特性的名称。</p>
+</li>
+<li>
+<p>缺点：序列化数据只包含数据本身以及类的结构，不包括类型标识和程序集信息；只能序列化公共属性和字段；不能序列化方法；文件庞大，文件格式复杂，传输占带宽。</p>
+</li>
+<li>
+<p>适用场景：当做配置文件存储数据，实时数据转换。</p>
+</li>
+</ul>
+<ol start="5">
+<li>【重点】JSON ，是一种轻量级的数据交换格式。</li>
+</ol>
+<ul>
+<li>
+<p>优点：兼容性高、数据格式比较简单，易于读写、序列化后数据较小，可扩展性好，兼容性好。与 XML 相比，其协议比较简单，解析速度比较快。</p>
+</li>
+<li>
+<p>缺点：数据的描述性比 XML 差、不适合性能要求为 ms 级别的情况、额外空间开销比较大。</p>
+</li>
+<li>
+<p>适用场景（可替代 XML ）：跨防火墙访问、可调式性要求高、基于Restful API 请求、传输数据量相对小，实时性要求相对低（例如秒级别）的服务。</p>
+</li>
+</ul>
+<ol start="7">
+<li>【了解】Thrift ，不仅是序列化协议，还是一个 RPC 框架。</li>
+</ol>
+<ul>
+<li>
+<p>优点：序列化后的体积小, 速度快、支持多种语言和丰富的数据类型、对于数据字段的增删具有较强的兼容性、支持二进制压缩编码。</p>
+</li>
+<li>
+<p>缺点：使用者较少、跨防火墙访问时，不安全、不具有可读性，调试代码时相对困难、不能与其他传输层协议共同使用（例如 HTTP）、无法支持向持久层直接读写数据，即不适合做数据持久化序列化协议。</p>
+</li>
+<li>
+<p>适用场景：分布式系统的 RPC 解决方案。</p>
+</li>
+</ul>
+<ol start="9">
+<li>【了解】Avro ，Hadoop 的一个子项目，解决了JSON的冗长和没有IDL的问题。</li>
+</ol>
+<ul>
+<li>
+<p>优点：支持丰富的数据类型、简单的动态语言结合功能、具有自我描述属性、提高了数据解析速度、快速可压缩的二进制数据形式、可以实现远程过程调用 RPC、支持跨编程语言实现。</p>
+</li>
+<li>
+<p>缺点：对于习惯于静态类型语言的用户不直观。</p>
+</li>
+<li>
+<p>适用场景：在 Hadoop 中做 Hive、Pig 和 MapReduce 的持久化数据格式。</p>
+</li>
+</ul>
+<ol start="11">
+<li>【重点】Protobuf ，将数据结构以 <code>.proto</code> 文件进行描述，通过代码生成工具可以生成对应数据结构的 POJO 对象和 Protobuf 相关的方法和属性。</li>
+</ol>
+<ul>
+<li>
+<p>优点：序列化后码流小，性能高、结构化数据存储格式（XML JSON等）、通过标识字段的顺序，可以实现协议的前向兼容、结构化的文档更容易管理和维护。</p>
+</li>
+<li>
+<p>缺点：需要依赖于工具生成代码、支持的语言相对较少，官方只支持Java 、C++、python。</p>
+</li>
+<li>
+<p>适用场景：对性能要求高的 RPC 调用、具有良好的跨防火墙的访问属性、适合应用层对象的持久化。</p>
+</li>
+</ul>
+<ol start="13">
+<li>其它</li>
+</ol>
+<ul>
+<li>
+<p>目前，阿里 RPC 框架 Dubbo 的可选序列化协议。</p>
+</li>
+<li>
+<p>目前，阿里 RPC 框架 Dubbo 的可选序列化协议。</p>
+</li>
+<li>
+<p>目前，阿里 RPC 框架 Dubbo 的<strong>默认</strong>序列化协议。</p>
+</li>
+<li>
+<p>目前，微博 RPC 框架 Motan 在使用它。</p>
+</li>
+<li>
+<p>【重点】Protostuff ，基于 Protobuf 协议，但不需要配置proto 文件，直接导包即可。</p>
+</li>
+<li>
+<p>【了解】Jboss Marshaling ，可以直接序列化 Java 类， 无须实 <code>java.io.Serializable</code> 接口。</p>
+</li>
+<li>
+<p>【了解】Message Pack ，一个高效的二进制序列化格式。</p>
+</li>
+<li>
+<p>【重点】<a class="link" href="https://www.oschina.net/p/hessian"  target="_blank" rel="noopener"
+    >Hessian</a> ，采用二进制协议的轻量级 remoting on http 服务。</p>
+</li>
+<li>
+<p>【重要】kryo ，是一个快速高效的Java对象图形序列化框架，主要特点是性能、高效和易用。该项目用来序列化对象到文件、数据库或者网络。</p>
+</li>
+<li>
+<p>【重要】FST ，fast-serialization 是重新实现的 Java 快速对象序列化的开发包。序列化速度更快（2-10倍）、体积更小，而且兼容 JDK 原生的序列化。要求 JDK 1.7 支持。</p>
+</li>
+</ul>
+<h2 id="netty-的零拷贝实现">Netty 的零拷贝实现？</h2>
+<p>Netty 的零拷贝实现，是体现在多方面的，主要如下：</p>
+<ol>
+<li>【重点】Netty 的接收和发送 ByteBuffer 采用堆外直接内存 <strong>Direct Buffer</strong> 。</li>
+</ol>
+<ul>
+<li>
+<p>使用堆外直接内存进行 Socket 读写，不需要进行字节缓冲区的二次拷贝；使用堆内内存会多了一次内存拷贝，JVM 会将堆内存 Buffer 拷贝一份到直接内存中，然后才写入 Socket 中。</p>
+</li>
+<li>
+<p>Netty 创建的 ByteBuffer 类型，由 ChannelConfig 配置。而 ChannelConfig 配置的 ByteBufAllocator 默认创建 Direct Buffer 类型。</p>
+</li>
+</ul>
+<ol start="3">
+<li><strong>CompositeByteBuf</strong> 类，可以将多个 ByteBuf 合并为一个逻辑上的 ByteBuf ，避免了传统通过内存拷贝的方式将几个小 Buffer 合并成一个大的 Buffer 。</li>
+</ol>
+<ul>
+<li><code>#addComponents(...)</code> 方法，可将 header 与 body 合并为一个逻辑上的 ByteBuf 。这两个 ByteBuf 在CompositeByteBuf 内部都是单独存在的，即 CompositeByteBuf 只是逻辑上是一个整体。</li>
+</ul>
+<ol start="5">
+<li>通过 <strong>FileRegion</strong> 包装的 FileChannel 。</li>
+</ol>
+<ul>
+<li><code>#tranferTo(...)</code> 方法，实现文件传输, 可以直接将文件缓冲区的数据发送到目标 Channel ，避免了传统通过循环 write 方式，导致的内存拷贝问题。</li>
+</ul>
+<ol start="7">
+<li>通过 <strong>wrap</strong> 方法, 我们可以将 <code>byte[]</code> 数组、ByteBuf、ByteBuffer 等包装成一个 Netty ByteBuf 对象, 进而避免了拷贝操作。</li>
+</ol>
+<h2 id="原生的-nio-存在-epoll-bug-是什么netty-是怎么解决的">原生的 NIO 存在 Epoll Bug 是什么？Netty 是怎么解决的？</h2>
+<p>🦅 <strong>Java NIO Epoll BUG</strong></p>
+<p>Java NIO Epoll 会导致 Selector 空轮询，最终导致 CPU 100% 。</p>
+<p>官方声称在 JDK 1.6 版本的 update18 修复了该问题，但是直到 JDK 1.7 版本该问题仍旧存在，只不过该 BUG 发生概率降低了一些而已，它并没有得到根本性解决。</p>
+<p>🦅 <strong>Netty 解决方案</strong></p>
+<p>对 Selector 的 select 操作周期进行<strong>统计</strong>，每完成一次<strong>空</strong>的 select 操作进行一次计数，若在某个周期内连续发生 N 次空轮询，则判断触发了 Epoll 死循环 Bug 。</p>
+<blockquote>
+<p>艿艿：此处<strong>空</strong>的 select 操作的定义是，select 操作执行了 0 毫秒。</p>
+</blockquote>
+<p>此时，Netty <strong>重建</strong> Selector 来解决。判断是否是其他线程发起的重建请求，若不是则将原 SocketChannel 从旧的 Selector 上取消注册，然后重新注册到新的 Selector 上，最后将原来的 Selector 关闭。</p>
+<h2 id="什么是-netty-空闲检测">什么是 Netty 空闲检测？</h2>
+<p>在 Netty 中，提供了 IdleStateHandler 类，正如其名，空闲状态处理器，用于检测连接的读写是否处于空闲状态。如果是，则会触发 IdleStateEvent 。</p>
+<p>IdleStateHandler 目前提供三种类型的心跳检测，通过构造方法来设置。代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// IdleStateHandler.java  
+</span></span><span class="line"><span class="cl">  
+</span></span><span class="line"><span class="cl">public IdleStateHandler(  
+</span></span><span class="line"><span class="cl"> int readerIdleTimeSeconds,  
+</span></span><span class="line"><span class="cl"> int writerIdleTimeSeconds,  
+</span></span><span class="line"><span class="cl"> int allIdleTimeSeconds) {  
+</span></span><span class="line"><span class="cl"> this(readerIdleTimeSeconds, writerIdleTimeSeconds, allIdleTimeSeconds,  
+</span></span><span class="line"><span class="cl"> TimeUnit.SECONDS);  
+</span></span><span class="line"><span class="cl">}  
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p><code>readerIdleTimeSeconds</code> 参数：为读超时时间，即测试端一定时间内未接受到被测试端消息。</p>
+</li>
+<li>
+<p><code>writerIdleTimeSeconds</code> 参数：为写超时时间，即测试端一定时间内向被测试端发送消息。</p>
+</li>
+<li>
+<p><code>allIdleTimeSeconds</code> 参数：为读或写超时时间。</p>
+</li>
+</ul>
+<hr>
+<p>另外，我们会在网络上看到类似《IdleStateHandler 心跳机制》这样标题的文章，实际上空闲检测和心跳机制是<strong>两件事</strong>。</p>
+<ul>
+<li>
+<p>只是说，因为我们使用 IdleStateHandler 的目的，就是检测到连接处于空闲，通过心跳判断其是否还是<strong>有效的连接</strong>。</p>
+</li>
+<li>
+<p>虽然说，TCP 协议层提供了 Keeplive 机制，但是该机制默认的心跳时间是 2 小时，依赖操作系统实现不够灵活。因而，我们才在应用层上，自己实现心跳机制。</p>
+</li>
+</ul>
+<p>具体的，我们来看看下面的问题 <a class="link" href="http://svip.iocoder.cn/Netty/Interview/#"  target="_blank" rel="noopener"
+    >「Netty 如何实现重连？」</a> 。</p>
+<h2 id="netty-如何实现重连">Netty 如何实现重连？</h2>
+<ul>
+<li>
+<p>客户端，通过 IdleStateHandler 实现定时检测是否空闲，例如说 15 秒。</p>
+</li>
+<li>
+<p>如果空闲，则向服务端发起心跳。</p>
+</li>
+<li>
+<p>如果多次心跳失败，则关闭和服务端的连接，然后重新发起连接。</p>
+</li>
+<li>
+<p>服务端，通过 IdleStateHandler 实现定时检测客户端是否空闲，例如说 90 秒。</p>
+</li>
+<li>
+<p>如果检测到空闲，则关闭客户端。</p>
+</li>
+<li>
+<p>注意，如果接收到客户端的心跳请求，要反馈一个心跳响应给客户端。通过这样的方式，使客户端知道自己心跳成功。</p>
+</li>
+</ul>
+<p>如下艿艿在自己的 <a class="link" href="https://github.com/YunaiV/TaroRPC"  target="_blank" rel="noopener"
+    >TaroRPC</a> 中提供的一个示例：</p>
+<ul>
+<li>
+<p><a class="link" href="https://github.com/YunaiV/TaroRPC/blob/master/transport/transport-netty4/src/main/java/cn/iocoder/taro/transport/netty4/NettyClient.java"  target="_blank" rel="noopener"
+    >NettyClient.java</a> 中，设置 IdleStateHandler 和 ClientHeartbeatHandler。核心代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// NettyHandler.java  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">.addLast(&#34;idleState&#34;, new IdleStateHandler(TaroConstants.TRANSPORT\_CLIENT\_IDLE, TaroConstants.TRANSPORT\_CLIENT\_IDLE, 0, TimeUnit.MILLISECONDS))  
+</span></span><span class="line"><span class="cl">.addLast(&#34;heartbeat&#34;, new ClientHeartbeatHandler())  
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><a class="link" href="https://github.com/YunaiV/TaroRPC/blob/master/transport/transport-netty4/src/main/java/cn/iocoder/taro/transport/netty4/NettyServer.java"  target="_blank" rel="noopener"
+    >NettyServer.java</a> 中，设置 IdleStateHandler 和 ServerHeartbeatHandler。核心代码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">// NettyServer.java  
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">.addLast(&#34;idleState&#34;, new IdleStateHandler(0, 0, TaroConstants.TRANSPORT\_SERVER\_IDLE, TimeUnit.MILLISECONDS))  
+</span></span><span class="line"><span class="cl">.addLast(&#34;heartbeat&#34;, new ServerHeartbeatHandler())  
+</span></span></code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p><a class="link" href="https://github.com/YunaiV/TaroRPC/blob/master/transport/transport-netty4/src/main/java/cn/iocoder/taro/transport/netty4/heartbeat/ClientHeartbeatHandler.java"  target="_blank" rel="noopener"
+    >ClientHeartbeatHandler.java</a> 中，碰到空闲，则发起心跳。不过，如何重连，暂时没有实现。需要考虑，重新发起连接可能会失败的情况。具体的，可以看看 <a class="link" href="https://blog.csdn.net/linuu/article/details/51509847"  target="_blank" rel="noopener"
+    >《一起学Netty（十四）之 Netty生产级的心跳和重连机制》</a> 文章中的，ConnectionWatchdog 的代码。</p>
+</li>
+<li>
+<p><a class="link" href="https://github.com/YunaiV/TaroRPC/blob/6ce2af911ccec9ed5dc75c7f3ebda9c758272f3b/transport/transport-netty4/src/main/java/cn/iocoder/taro/transport/netty4/heartbeat/ServerHeartbeatHandler.java"  target="_blank" rel="noopener"
+    >ServerHeartbeatHandler.java</a> 中，检测到客户端空闲，则直接关闭连接。</p>
+</li>
+</ul>
+<h2 id="netty-自己实现的-bytebuf-有什么优点">Netty 自己实现的 ByteBuf 有什么优点？</h2>
+<p>如下是 <a class="link" href="http://svip.iocoder.cn/Netty/ByteBuf-1-1-ByteBuf-intro/#"  target="_blank" rel="noopener"
+    >《Netty 实战》</a> 对它的<strong>优点总</strong>结：</p>
+<blockquote>
+<ul>
+<li>
+<p>A01. 它可以被用户自定义的<strong>缓冲区类型</strong>扩展</p>
+</li>
+<li>
+<p>A02. 通过内置的符合缓冲区类型实现了透明的<strong>零拷贝</strong></p>
+</li>
+<li>
+<p>A03. 容量可以<strong>按需增长</strong></p>
+</li>
+<li>
+<p>A04. 在读和写这两种模式之间切换不需要调用 <code>#flip()</code> 方法</p>
+</li>
+<li>
+<p>A05. 读和写使用了<strong>不同的索引</strong></p>
+</li>
+<li>
+<p>A06. 支持方法的<strong>链式</strong>调用</p>
+</li>
+<li>
+<p>A07. 支持引用计数</p>
+</li>
+<li>
+<p>A08. 支持<strong>池化</strong></p>
+</li>
+</ul>
+</blockquote>
+<ul>
+<li>特别是第 A04 这点，相信很多胖友都被 NIO ByteBuffer 反人类的读模式和写模式给坑哭了。在 <a class="link" href="http://svip.iocoder.cn/Netty/nio-3-buffer/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码分析 —— NIO 基础（三）之 Buffer》</a> 中，我们也吐槽过了。😈</li>
+</ul>
+<p>想要进一步深入的，可以看看 <a class="link" href="http://svip.iocoder.cn/Netty/ByteBuf-1-1-ByteBuf-intro/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— Buffer 之 ByteBuf（一）简介》</a> 。</p>
+<h2 id="netty-为什么要实现内存管理">Netty 为什么要实现内存管理？</h2>
+<p>🦅 <strong>老艿艿的理解</strong></p>
+<p>在 Netty 中，IO 读写必定是非常频繁的操作，而考虑到更高效的网络传输性能，Direct ByteBuffer 必然是最合适的选择。但是 Direct ByteBuffer 的申请和释放是高成本的操作，那么进行<strong>池化</strong>管理，多次重用是比较有效的方式。但是，不同于一般于我们常见的对象池、连接池等<strong>池化</strong>的案例，ByteBuffer 是有<strong>大小</strong>一说。又但是，申请多大的 Direct ByteBuffer 进行池化又会是一个大问题，太大会浪费内存，太小又会出现频繁的扩容和内存复制！！！所以呢，就需要有一个合适的内存管理算法，解决<strong>高效分配内存</strong>的同时又解决<strong>内存碎片化</strong>的问题。</p>
+<p>🦅 <strong>官方的说法</strong></p>
+<blockquote>
+<p>FROM <a class="link" href="https://skyao.gitbooks.io/learning-netty/content/buffer/pooled_buffer.html"  target="_blank" rel="noopener"
+    >《Netty 学习笔记 —— Pooled buffer》</a></p>
+<p>Netty 4.x 增加了 Pooled Buffer，实现了高性能的 buffer 池，分配策略则是结合了 buddy allocation 和 slab allocation 的 <strong>jemalloc</strong> 变种，代码在<code>io.netty.buffer.PoolArena</code> 中。</p>
+<p>官方说提供了以下优势：</p>
+<ul>
+<li>
+<p>频繁分配、释放 buffer 时减少了 GC 压力。</p>
+</li>
+<li>
+<p>在初始化新 buffer 时减少内存带宽消耗( 初始化时不可避免的要给buffer数组赋初始值 )。</p>
+</li>
+<li>
+<p>及时的释放 direct buffer 。</p>
+</li>
+</ul>
+</blockquote>
+<p>🦅 <strong>hushi55 大佬的理解</strong></p>
+<blockquote>
+<blockquote>
+<p>C/C++ 和 java 中有个围城，城里的想出来，城外的想进去！**</p>
+</blockquote>
+<p>这个围城就是自动内存管理！</p>
+<p><strong>Netty 4 buffer 介绍</strong></p>
+<p>Netty4 带来一个与众不同的特点是其 ByteBuf 的实现，相比之下，通过维护两个独立的读写指针， 要比 <code>io.netty.buffer.ByteBuf</code> 简单不少，也会更高效一些。不过，Netty 的 ByteBuf 带给我们的最大不同，就是他不再基于传统 JVM 的 GC 模式，相反，它采用了类似于 C++ 中的 malloc/free 的机制，需要开发人员来手动管理回收与释放。从手动内存管理上升到GC，是一个历史的巨大进步， 不过，在20年后，居然有曲线的回归到了手动内存管理模式，正印证了马克思哲学观： <strong>社会总是在螺旋式前进的，没有永远的最好。</strong></p>
+<p><strong>① GC 内存管理分析</strong></p>
+<p>的确，就内存管理而言，GC带给我们的价值是不言而喻的，不仅大大的降低了程序员的心智包袱， 而且，也极大的减少了内存管理带来的 Crash 困扰，为函数式编程（大量的临时对象）、脚本语言编程带来了春天。 并且，高效的GC算法也让大部分情况下程序可以有更高的执行效率。 不过，也有很多的情况，可能是手工内存管理更为合适的。譬如：</p>
+<ul>
+<li>
+<p>对于类似于业务逻辑相对简单，譬如网络路由转发型应用（很多erlang应用其实是这种类型）， 但是 QPS 非常高，比如1M级，在这种情况下，在每次处理中即便产生1K的垃圾，都会导致频繁的GC产生。 在这种模式下，erlang 的按进程回收模式，或者是 C/C++ 的手工回收机制，效率更高。</p>
+</li>
+<li>
+<p>Cache 型应用，由于对象的存在周期太长，GC 基本上就变得没有价值。</p>
+</li>
+</ul>
+<p>所以，理论上，尴尬的GC实际上比较适合于处理介于这 2 者之间的情况： 对象分配的频繁程度相比数据处理的时间要少得多的，但又是相对短暂的， 典型的，对于OLTP型的服务，处理能力在 1K QPS 量级，每个请求的对象分配在 10K-50K 量级， 能够在 5-10s 的时间内进行一 次younger GC ，每次GC的时间可以控制在 10ms 水平上， 这类的应用，实在是太适合 GC 行的模式了，而且结合 Java 高效的分代 GC ，简直就是一个理想搭配。</p>
+<p><strong>② 影响</strong></p>
+<p>Netty 4 引入了手工内存的模式，我觉得这是一大创新，这种模式甚至于会延展， 应用到 Cache 应用中。实际上，结合 JVM 的诸多优秀特性，如果用 Java 来实现一个 Redis 型 Cache、 或者 In-memory SQL Engine，或者是一个 Mongo DB，我觉得相比 C/C++ 而言，都要更简单很多。 实际上，JVM 也已经提供了打通这种技术的机制，就是 Direct Memory 和 Unsafe 对象。 基于这个基础，我们可以像 C 语言一样直接操作内存。实际上，Netty4 的 ByteBuf 也是基于这个基础的。</p>
+</blockquote>
+<p>更多详细的内容，胖友可以看看 <a class="link" href="http://svip.iocoder.cn/Netty/ByteBuf-3-1-Jemalloc-intro/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— Buffer 之 Jemalloc（一）简介》</a> 。</p>
+<h2 id="netty-如何实心内存管理">Netty 如何实心内存管理？</h2>
+<blockquote>
+<p>这个题目，简单了解即可，如果深入，就要去看 <a class="link" href="http://svip.iocoder.cn/categories/Netty/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— Buffer》</a> 相关的源码。而且，看完就忘记，比较难和复杂。</p>
+<p>当然，看懂那一刻，乐趣无穷，哈哈哈哈。</p>
+</blockquote>
+<p>Netty 内存管理机制，基于 <a class="link" href="http://www.cnhalo.net/2016/06/13/memory-optimize/"  target="_blank" rel="noopener"
+    >Jemalloc</a> 算法。</p>
+<ul>
+<li>
+<p>首先会预申请一大块内存 <strong>Arena</strong> ，Arena 由许多 Chunk 组成，而每个 Chunk 默认由2048个page组成。</p>
+</li>
+<li>
+<p><strong>Chunk</strong> 通过 <strong>AVL</strong> 树的形式组织 <strong>Page</strong> ，每个叶子节点表示一个 Page ，而中间节点表示内存区域，节点自己记录它在整个 Arena 中的偏移地址。当区域被分配出去后，中间节点上的标记位会被标记，这样就表示这个中间节点以下的所有节点都已被分配了。大于 8k 的内存分配在 <strong>PoolChunkList</strong> 中，而 <strong>PoolSubpage</strong> 用于分配小于 8k 的内存，它会把一个 page 分割成多段，进行内存分配。</p>
+</li>
+</ul>
+<h2 id="什么是-netty-的内存泄露检测是如何进行实现的">什么是 Netty 的内存泄露检测？是如何进行实现的？</h2>
+<blockquote>
+<p>艿艿：这是一道比较复杂的面试题，可以挑战一下。</p>
+</blockquote>
+<p>推荐阅读如下两篇文章：</p>
+<ul>
+<li>
+<p><a class="link" href="http://calvin1978.blogcn.com/articles/netty-leak.html"  target="_blank" rel="noopener"
+    >《Netty 之有效规避内存泄漏》</a> 从原理层面解释。</p>
+</li>
+<li>
+<p><a class="link" href="http://svip.iocoder.cn/Netty/ByteBuf-1-3-ByteBuf-resource-leak-detector/"  target="_blank" rel="noopener"
+    >《精尽 Netty 源码解析 —— Buffer 之 ByteBuf（三）内存泄露检测》</a> 从源码层面解读。</p>
+</li>
+</ul>
+<p>另外，Netty 的内存泄露检测的实现，是对 WeakReference 和 ReferenceQueue 很好的学习。之前很多胖友在看了 <a class="link" href="http://www.iocoder.cn/Fight/Four-reference-types-in-Java"  target="_blank" rel="noopener"
+    >《Java 中的四种引用类型》</a> 之后，是不太理解 Java 的四种引用的具体使用场景，这不就来了么。</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析一</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%89/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析三</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%BA%8C/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析二</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%BA%94/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析五</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%9B%9B/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">netty源码分析四</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <script src='//unpkg.com/@waline/client@v2/dist/waline.js'></script>
+<link href='//unpkg.com/@waline/client@v2/dist/waline.css' rel='stylesheet'/>
+<div id="waline" class="waline-container"></div>
+<style>
+    .waline-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+        --waline-font-size: var(--article-font-size);
+    }
+    .waline-container .wl-count {
+        color: var(--card-text-color-main);
+    }
+</style><script>
+    
+    Waline.init({"dark":"html[data-scheme=\"dark\"]","el":"#waline","emoji":["https://cdn.jsdelivr.net/npm/sticker-heo@2022.7.5/Sticker-100/"],"locale":{"admin":"👻屑博主","placeholder":"🎉留下你的脚印."},"requiredMeta":["name","email"]});
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2023 TauZZ&#39;s Blog
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        主题 <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.16.0">Stack</a></b> 由 <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a> 设计
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/myblog/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
