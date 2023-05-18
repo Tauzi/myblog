@@ -4,7 +4,6 @@ description:
 date: 2023-05-04
 categories:
     - Netty
-
 ---
 
 
@@ -47,7 +46,7 @@ NIO 是什么？
 
 *   NIO ，全称 New IO ，也叫 Non-Block IO ，是一种**非阻塞** \+ 同步的通信模式。
     
-*   [《精尽 Netty 源码分析 —— NIO 基础（一）之简介》](/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80)
+*   [《精尽 Netty 源码分析 —— NIO 基础（一）之简介》](https://tauzi.github.io/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%80/)
     
 
 🦅 **原理**
@@ -59,17 +58,17 @@ NIO 是什么？
 
 *   服务器端只要提供一个线程负责 Selector 的轮询，就可以接入成千上万个客户端，这就是 JDK NIO 库的巨大进步。
     
-*   [《精尽 Netty 源码分析 —— NIO 基础（四）之 Selector》](http://svip.iocoder.cn/Netty/nio-4-selector/)
+*   [《精尽 Netty 源码分析 —— NIO 基础（四）之 Selector》](https://tauzi.github.io/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E5%9B%9B/)
     
 *   通道分为两大类：一类是网络读写（SelectableChannel），一类是用于文件操作（FileChannel）。我们使用的是前者 SocketChannel 和 ServerSocketChannel ，都是SelectableChannel 的子类。
     
-*   [《精尽 Netty 源码分析 —— NIO 基础（二）之 Channel》](http://svip.iocoder.cn/Netty/nio-2-channel/)
+*   [《精尽 Netty 源码分析 —— NIO 基础（二）之 Channel》](https://tauzi.github.io/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%BA%8C/)
     
 *   BIO 是将数据直接写入或读取到流 Stream 对象中。
     
 *   NIO 的数据操作都是在 Buffer 中进行的。Buffer 实际上是一个数组。Buffer 最常见的类型是ByteBuffer，另外还有 CharBuffer，ShortBuffer，IntBuffer，LongBuffer，FloatBuffer，DoubleBuffer。
     
-*   [《精尽 Netty 源码分析 —— NIO 基础（三）之 Buffer》](http://svip.iocoder.cn/Netty/nio-3-buffer/)
+*   [《精尽 Netty 源码分析 —— NIO 基础（三）之 Buffer》](https://tauzi.github.io/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%B8%89/)
     
 
 *   缓冲区 Buffer ：它是 NIO 与 BIO 的一个重要区别。
@@ -83,7 +82,7 @@ NIO 是什么？
 
 *   代码参见 [nio](https://github.com/ITDragonBlog/daydayup/tree/master/Netty/socket-io/src/com/itdragon/nio)
     
-*   [《精尽 Netty 源码分析 —— NIO 基础（五）之示例》](http://svip.iocoder.cn/Netty/nio-5-demo/)
+*   [《精尽 Netty 源码分析 —— NIO 基础（五）之示例》](https://tauzi.github.io/myblog/p/netty%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E4%BA%94/)
     
 
 🦅 **小结**

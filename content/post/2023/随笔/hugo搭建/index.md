@@ -398,3 +398,15 @@ git push -f git@github.com:Tauzi/myblog.git master:gh-pages    #向存储库推�
 ![image7a1a34437d8be44b.png](https://img.picgo.net/2023/05/09/image7a1a34437d8be44b.png)
 
 等待完成构建后就可以访问了!
+
+## 省流版
+
+1.`git clone https://github.com/Tauzi/myblog.git`
+
+2.修改config名称配置
+
+3.删除post里我的笔记添加你自己的笔记
+
+4.开启page
+
+5.每次写完blog 使用git bash deploy.sh推送
